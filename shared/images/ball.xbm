@@ -1,0 +1,4 @@
+#define ball_width 4
+#define ball_height 4
+static unsigned char ball_bits[] = {
+   0x06, 0x09, 0x09, 0x06 };
