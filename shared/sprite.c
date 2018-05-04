@@ -2,7 +2,7 @@
 #include "canvas.h"
 
 Sprite sprite_load(unsigned char* data, uint8_t width, uint8_t height) {
-    return (Sprite) {width: width, height: height, data: data};
+    return (Sprite) {.width= width, .height= height, .data= data};
 }
 
 void sprite_draw(Sprite* sprite, uint8_t x, uint8_t y) {

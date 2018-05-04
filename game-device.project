@@ -23,6 +23,37 @@
     <File Name="device/device_runtime.h"/>
     <File Name="device/device_runtime.c"/>
     <VirtualDirectory Name="shared">
+      <VirtualDirectory Name="libfixmatrix">
+        <File Name="shared/libfixmatrix/fixvector4d.h"/>
+        <File Name="shared/libfixmatrix/fixvector4d.c"/>
+        <File Name="shared/libfixmatrix/fixvector3d.h"/>
+        <File Name="shared/libfixmatrix/fixvector3d.c"/>
+        <File Name="shared/libfixmatrix/fixvector2d.h"/>
+        <File Name="shared/libfixmatrix/fixvector2d.c"/>
+        <File Name="shared/libfixmatrix/fixquat.h"/>
+        <File Name="shared/libfixmatrix/fixquat.c"/>
+        <File Name="shared/libfixmatrix/fixmatrix.h"/>
+        <File Name="shared/libfixmatrix/fixmatrix.c"/>
+        <File Name="shared/libfixmatrix/fixarray.h"/>
+        <File Name="shared/libfixmatrix/fixarray.c"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="libfixmath">
+        <File Name="shared/libfixmath/uint32.h"/>
+        <File Name="shared/libfixmath/uint32.c"/>
+        <File Name="shared/libfixmath/int64.h"/>
+        <File Name="shared/libfixmath/fract32.h"/>
+        <File Name="shared/libfixmath/fract32.c"/>
+        <File Name="shared/libfixmath/fixmath.h"/>
+        <File Name="shared/libfixmath/fix16.hpp"/>
+        <File Name="shared/libfixmath/fix16.h"/>
+        <File Name="shared/libfixmath/fix16.c"/>
+        <File Name="shared/libfixmath/fix16_trig.c"/>
+        <File Name="shared/libfixmath/fix16_trig_sin_lut.h"/>
+        <File Name="shared/libfixmath/fix16_sqrt.c"/>
+        <File Name="shared/libfixmath/fix16_exp.c"/>
+      </VirtualDirectory>
+      <File Name="shared/vector_drawing.h"/>
+      <File Name="shared/vector_drawing.c"/>
       <VirtualDirectory Name="images">
         <File Name="shared/images/smily.xbm"/>
         <File Name="shared/images/ball.xbm"/>
@@ -53,8 +84,10 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="Cross GCC ( arm-none-eabi )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-mthumb;-Wall;-march=armv6-m;-msoft-float;-Wa,-adhln=test.s" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-mthumb;-Wall;-march=armv6-m;-Wa,-adhln=test.s;-msoft-float;" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
+        <Preprocessor Value="FIXMATH_NO_CACHE=1"/>
+        <Preprocessor Value="FIXMATH_NO_64BIT=1"/>
       </Compiler>
       <Linker Options="-T$(ProjectPath)/md407-ram.x;-L$(ARM_V6LIB) -L$(ARM_GCC_V6LIB);-nostdlib" Required="yes">
         <Library Value="gcc"/>

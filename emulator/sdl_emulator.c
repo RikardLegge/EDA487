@@ -5,7 +5,6 @@
 static SDL_Window *window = NULL;
 static SDL_Renderer* renderer;
 static SDL_Texture* texture;
-static SDL_GLContext gl_context;
 static Uint32 emulator_buffer[128*64];
 
 int emulator_address_1 = 0;
@@ -56,6 +55,8 @@ void emulator_dispose() {
 
 void emulator_poll_keyboard() {
     SDL_Event event;
+
+    SDL_PumpEvents();
     while (SDL_PollEvent(&event)) {
         int key_code = SDL_GetScancodeFromKey(event.key.keysym.sym);
         switch (event.type) {
@@ -139,10 +140,14 @@ void delay_milli(unsigned int time) {
 
 int key_is_active(int hex) {
     short hex_to_sdl[] = {
+            SDL_SCANCODE_X,
+
             SDL_SCANCODE_1, SDL_SCANCODE_2, SDL_SCANCODE_3,
             SDL_SCANCODE_Q, SDL_SCANCODE_W, SDL_SCANCODE_E,
             SDL_SCANCODE_A, SDL_SCANCODE_S, SDL_SCANCODE_D,
-            SDL_SCANCODE_Z, SDL_SCANCODE_X, SDL_SCANCODE_C,
+
+            SDL_SCANCODE_4, SDL_SCANCODE_R, SDL_SCANCODE_F, SDL_SCANCODE_V,
+            SDL_SCANCODE_Z, SDL_SCANCODE_C
     };
 
     short key = hex_to_sdl[hex];

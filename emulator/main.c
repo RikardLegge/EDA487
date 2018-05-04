@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     while(!emulator_exit()) {
         game_loop();
         emulator_end_frame();
-        delay_milli(10);
+        delay_milli(20);
     }
 
     emulator_dispose();
