@@ -108,8 +108,8 @@ void canvas_clear() {
     }
 }
 
-void canvas_pixel(uint8_t x, uint8_t y, uint8_t set) {
-    if (x >= 128 || y >= 64)
+void canvas_pixel(int x, int y, uint8_t set) {
+    if (0 > x || 0 >  y || x >= 128 || y >= 64)
         return;
 
     int index = 0;

@@ -1,5 +1,6 @@
 #include "vector_drawing.h"
 #include "canvas.h"
+#include "libfixmatrix/fixvector4d.h"
 
 int point_dist(Point p0, Point p1) {
     int dx = p0.x - p0.y;
@@ -12,6 +13,10 @@ Point point_add(Point p0, Point p1){
 }
 Point point_offset(Point p, int x, int y) {
     return (Point) {.x=p.x+x, .y=p.y+y};
+}
+
+Point point_from_v4d(v4d* vec) {
+    return (Point) {.x=vec->x, .y=vec->y};
 }
 
 // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm

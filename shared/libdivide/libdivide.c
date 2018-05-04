@@ -1,7 +1,7 @@
 #include "libdivide.h"
 
 int32_t mod(int32_t val, int32_t div) {
-    while(val > mod) val -= div;
+    while(val > div) val -= div;
     return val;
 }
 

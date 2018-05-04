@@ -4,6 +4,7 @@
 #define _fixvector4d_h_
 
 #include "../libfixmath/fix16.h"
+#include "fixmatrix.h"
 
 typedef struct {
 	fix16_t x;
@@ -13,6 +14,7 @@ typedef struct {
 } v4d;
 
 // Basic arithmetic
+void v4d_mf16_mult(const v4d *v, const mf16 *M, v4d *dest);
 void v4d_add(v4d *dest, const v4d *a, const v4d *b);
 void v4d_sub(v4d *dest, const v4d *a, const v4d *b);
 void v4d_mul_s(v4d *dest, const v4d *a, fix16_t b);

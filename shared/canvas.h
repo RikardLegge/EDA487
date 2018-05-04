@@ -7,4 +7,4 @@
 
 void canvas_flush();
 void canvas_clear();
-void canvas_pixel(uint8_t x, uint8_t y, uint8_t set);
+void canvas_pixel(int x, int y, uint8_t set);

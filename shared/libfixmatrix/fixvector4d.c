@@ -1,6 +1,37 @@
 #include "fixvector4d.h"
 #include "fixarray.h"
 
+void v4d_mf16_mult(const v4d *v, const mf16 *M, v4d *dest) {
+    dest->x = fix16_add( fix16_add(
+            fix16_mul(M->data[0][0], v->x),
+            fix16_mul(M->data[0][1], v->y)),
+        fix16_add(
+            fix16_mul(M->data[0][2], v->z),
+            fix16_mul(M->data[0][3], v->w)
+        ));
+    dest->y = fix16_add( fix16_add(
+            fix16_mul(M->data[1][0], v->x),
+            fix16_mul(M->data[1][1], v->y)),
+        fix16_add(
+            fix16_mul(M->data[1][2], v->z),
+            fix16_mul(M->data[1][3], v->w)
+        ));
+    dest->z = fix16_add( fix16_add(
+            fix16_mul(M->data[2][0], v->x),
+            fix16_mul(M->data[2][1], v->y)),
+        fix16_add(
+            fix16_mul(M->data[2][2], v->z),
+            fix16_mul(M->data[2][3], v->w)
+        ));
+    dest->w = fix16_add( fix16_add(
+            fix16_mul(M->data[3][0], v->x),
+            fix16_mul(M->data[3][1], v->y)),
+        fix16_add(
+            fix16_mul(M->data[3][2], v->z),
+            fix16_mul(M->data[3][3], v->w)
+        ));
+}
+
 void v4d_add(v4d *dest, const v4d *a, const v4d *b)
 {
         dest->x = fix16_add(a->x, b->x);
