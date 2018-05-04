@@ -11,13 +11,19 @@ void startup ( void )
 }
 
 #include "../shared/game.h"
+#include "device/device_runtime.h"
 
 void main() {
-    *((unsigned long *) 0x40023830) = 0x18;
-    asm volatile(
-        " LDR r0,=0x08000209 \n"
-        " BLX r0 \n"
-    );
+//    *((unsigned long *) 0x40023830) = 0x18;
+//    asm volatile(
+//        " LDR r0,=0x08000209 \n"
+//        " BLX r0 \n"
+//    );
+    
+    device_init();
+    game_init();
 
-    game_main();
+    while(1) {
+        game_loop();
+    }
 }

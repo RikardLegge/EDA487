@@ -19,12 +19,8 @@ void game_init() {
 
 int t = 0;
 void game_loop() {
-    int set = (t / 64) %2;
-    for(uint8_t i = 0; i < 128; i++){
-        canvas_pixel(i, t%64, set);
-    }
-
-    sprite_draw(&smily_sprite, 10, 10);
+    canvas_clear();
+    sprite_draw(&smily_sprite, t % 128, (t/128)%64);
 
     canvas_flush();
     t++;

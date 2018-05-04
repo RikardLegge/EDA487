@@ -5,8 +5,6 @@
 
 int emulator_exit();
 
-void emulator_keyboard_init();
-
 void emulator_init();
 void emulator_end_frame();
 void emulator_dispose();
