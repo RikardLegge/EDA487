@@ -1,6 +1,6 @@
 #include "fix16.h"
 #include "int64.h"
-
+#include "../libdivide/libdivide.h"
 
 /* Subtraction and addition with overflow detection.
  * The versions without overflow detection are inlined in the header.
@@ -273,10 +273,10 @@ fix16_t fix16_smul(fix16_t inArg0, fix16_t inArg1)
  * be efficient, the processor has to have 32-bit hardware division.
  */
 #if !defined(FIXMATH_OPTIMIZE_8BIT)
-#ifdef __GNUC__
+//#ifdef __GNUC__
 // Count leading zeros, using processor-specific instruction if available.
-#define clz(x) (__builtin_clzl(x) - (8 * sizeof(long) - 32))
-#else
+//#define clz(x) (__builtin_clzl(x) - (8 * sizeof(long) - 32))
+//#else
 static uint8_t clz(uint32_t x)
 {
 	uint8_t result = 0;
@@ -285,7 +285,7 @@ static uint8_t clz(uint32_t x)
 	while (!(x & 0x80000000)) { result += 1; x <<= 1; }
 	return result;
 }
-#endif
+//#endif
 
 fix16_t fix16_div(fix16_t a, fix16_t b)
 {
@@ -303,12 +303,13 @@ fix16_t fix16_div(fix16_t a, fix16_t b)
 	// Kick-start the division a bit.
 	// This improves speed in the worst-case scenarios where N and D are large
 	// It gets a lower estimate for the result by N/(D >> 17 + 1).
-	if (divider & 0xFFF00000)
-	{
-		uint32_t shifted_div = ((divider >> 17) + 1);
-		quotient = remainder / shifted_div;
-		remainder -= ((uint64_t)quotient * divider) >> 17;
-	}
+//	if (divider & 0xFFF00000)
+//	{
+//		uint32_t shifted_div = ((divider >> 17) + 1);
+//		quotient = remainder / shifted_div;
+//        quotient = divide_u(remainder, shifted_div);
+//		remainder -= ((uint64_t)quotient * divider) >> 17;
+//	}
 	
 	// If the divider is divisible by 2^n, take advantage of it.
 	while (!(divider & 0xF) && bit_pos >= 4)
@@ -325,8 +326,10 @@ fix16_t fix16_div(fix16_t a, fix16_t b)
 		remainder <<= shift;
 		bit_pos -= shift;
 		
-		uint32_t div = remainder / divider;
-		remainder = remainder % divider;
+//		uint32_t div = remainder / divider;
+        uint32_t div = divide_u(remainder, divider);
+//		remainder = remainder % divider;
+        remainder = mod(remainder, divider);
 		quotient += div << bit_pos;
 
 		#ifndef FIXMATH_NO_OVERFLOW
@@ -369,8 +372,8 @@ fix16_t fix16_div(fix16_t a, fix16_t b)
 {
 	// This uses the basic binary restoring division algorithm.
 	// It appears to be faster to do the whole division manually than
-	// trying to compose a 64-bit divide out of 32-bit divisions on
-	// platforms without hardware divide.
+	// trying to compose a 64-bit libdivide out of 32-bit divisions on
+	// platforms without hardware libdivide.
 	
 	if (b == 0)
 		return fix16_minimum;

@@ -21,7 +21,8 @@
 .data={{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}}\
 }
 
-mf16 perspective_projection = mat4_new();
+mf16 persp_proj = mat4_new();
+mf16 camera_proj = mat4_new();
 
 void perspective_projection_init() {
     fix16_t near = F16C(1,0);
@@ -31,12 +32,17 @@ void perspective_projection_init() {
     fix16_t scale = fix16_div(F16C(1,0), fix16_tan(fov));
 
     // set the basic projection matrix
-    perspective_projection.data[0][0] = scale; // scale the x coordinates of the projected point
-    perspective_projection.data[1][1] = scale; // scale the y coordinates of the projected point
-    perspective_projection.data[2][2] = fix16_mul(F16C(-1,0), fix16_div(far,fix16_sub(far ,near))); // used to remap z to [0,1]
-    perspective_projection.data[3][2] = fix16_mul(fix16_mul(F16C(-1,0),near), fix16_div(far,fix16_sub(far ,near)));// -far * near / (far - near); // used to remap z [0,1]
-    perspective_projection.data[2][3] = F16C(-1,0); // set w = -z
-    perspective_projection.data[3][3] = 0;
+    persp_proj.data[0][0] = scale; // scale the x coordinates of the projected point
+    persp_proj.data[1][1] = scale; // scale the y coordinates of the projected point
+    persp_proj.data[2][2] = fix16_mul(F16C(-1,0), fix16_div(far,fix16_sub(far ,near))); // used to remap z to [0,1]
+    persp_proj.data[3][2] = fix16_mul(fix16_mul(F16C(-1,0),near), fix16_div(far,fix16_sub(far ,near)));// -far * near / (far - near); // used to remap z [0,1]
+    persp_proj.data[2][3] = F16C(-1,0); // set w = -z
+    persp_proj.data[4][4] = 0;
+    persp_proj.data[4][3] = -1;
+
+    persp_proj.data[4][1] = F16C(1,0);
+    persp_proj.data[4][2] = F16C(1,0);
+    persp_proj.data[4][3] = F16C(1,0);
 }
 
 void game_init() {

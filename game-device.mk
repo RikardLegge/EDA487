@@ -28,7 +28,7 @@ LibraryPathSwitch      :=-L
 PreprocessorSwitch     :=-D
 SourceSwitch           :=-c 
 OutputFile             :=$(IntermediateDirectory)/$(ProjectName).elf
-Preprocessors          :=$(PreprocessorSwitch)FIXMATH_NO_CACHE=1 $(PreprocessorSwitch)FIXMATH_NO_64BIT=1 
+Preprocessors          :=$(PreprocessorSwitch)FIXMATH_NO_CACHE=1 $(PreprocessorSwitch)FIXMATH_NO_64BIT=1 $(PreprocessorSwitch)FIXMATH_FAST_SIN=1 
 ObjectSwitch           :=-o 
 ArchiveOutputSwitch    := 
 PreprocessOnlySwitch   :=-E
@@ -66,8 +66,9 @@ ARM_V6LIB:=$(GccArmDir)/arm-none-eabi/lib/thumb/v6-m
 ARM_GCC_V6LIB:=$(GccArmDir)/lib/gcc/arm-none-eabi/7.2.1/thumb/v6-m
 ARM_M4FPLIB:=$(GccArmDir)/arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard
 ARM_GCC_M4FPLIB:=$(GccArmDir)/lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m
-Objects0=$(IntermediateDirectory)/shared_libfixmatrix_fixvector4d.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixvector3d.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixquat.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fix16.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fix16_sqrt.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fix16_exp.c$(ObjectSuffix) $(IntermediateDirectory)/shared_sprite.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixarray.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixmatrix.c$(ObjectSuffix) $(IntermediateDirectory)/device_main.c$(ObjectSuffix) \
-	$(IntermediateDirectory)/shared_libfixmatrix_fixvector2d.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fix16_trig.c$(ObjectSuffix) $(IntermediateDirectory)/shared_game.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_uint32.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fract32.c$(ObjectSuffix) $(IntermediateDirectory)/shared_util.c$(ObjectSuffix) $(IntermediateDirectory)/shared_vector_drawing.c$(ObjectSuffix) $(IntermediateDirectory)/shared_canvas.c$(ObjectSuffix) $(IntermediateDirectory)/device_device_runtime.c$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/shared_libfixmatrix_fixvector4d.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixvector3d.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixquat.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libdivide_libdivide.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fix16.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fix16_sqrt.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fix16_exp.c$(ObjectSuffix) $(IntermediateDirectory)/shared_sprite.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixarray.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixmatrix.c$(ObjectSuffix) \
+	$(IntermediateDirectory)/device_main.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmatrix_fixvector2d.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fix16_trig.c$(ObjectSuffix) $(IntermediateDirectory)/shared_game.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_uint32.c$(ObjectSuffix) $(IntermediateDirectory)/shared_libfixmath_fract32.c$(ObjectSuffix) $(IntermediateDirectory)/shared_util.c$(ObjectSuffix) $(IntermediateDirectory)/shared_vector_drawing.c$(ObjectSuffix) $(IntermediateDirectory)/shared_canvas.c$(ObjectSuffix) $(IntermediateDirectory)/device_device_runtime.c$(ObjectSuffix) \
+	
 
 
 
@@ -127,6 +128,14 @@ $(IntermediateDirectory)/shared_libfixmatrix_fixquat.c$(DependSuffix): shared/li
 
 $(IntermediateDirectory)/shared_libfixmatrix_fixquat.c$(PreprocessSuffix): shared/libfixmatrix/fixquat.c
 	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/shared_libfixmatrix_fixquat.c$(PreprocessSuffix) shared/libfixmatrix/fixquat.c
+
+$(IntermediateDirectory)/shared_libdivide_libdivide.c$(ObjectSuffix): shared/libdivide/libdivide.c $(IntermediateDirectory)/shared_libdivide_libdivide.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/Users/legge/Development/moppen-game/shared/libdivide/libdivide.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/shared_libdivide_libdivide.c$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/shared_libdivide_libdivide.c$(DependSuffix): shared/libdivide/libdivide.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/shared_libdivide_libdivide.c$(ObjectSuffix) -MF$(IntermediateDirectory)/shared_libdivide_libdivide.c$(DependSuffix) -MM shared/libdivide/libdivide.c
+
+$(IntermediateDirectory)/shared_libdivide_libdivide.c$(PreprocessSuffix): shared/libdivide/libdivide.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/shared_libdivide_libdivide.c$(PreprocessSuffix) shared/libdivide/libdivide.c
 
 $(IntermediateDirectory)/shared_libfixmath_fix16.c$(ObjectSuffix): shared/libfixmath/fix16.c $(IntermediateDirectory)/shared_libfixmath_fix16.c$(DependSuffix)
 	$(CC) $(SourceSwitch) "/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/shared_libfixmath_fix16.c$(ObjectSuffix) $(IncludePath)

@@ -8,7 +8,7 @@
    8              		.eabi_attribute 30, 6
    9              		.eabi_attribute 34, 0
   10              		.eabi_attribute 18, 4
-  11              		.file	"fixquat.c"
+  11              		.file	"fix16.c"
   12              		.text
   13              	.Ltext0:
   14              		.cfi_sections	.debug_frame
@@ -54,1730 +54,1349 @@
   80 0030 78040000 		.word	1144
   81              		.text
   82              		.align	1
-  83              		.syntax unified
-  84              		.code	16
-  85              		.thumb_func
-  86              		.fpu softvfp
-  88              	fix16_sq:
-  89              	.LFB14:
-  90              		.file 1 "/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h"
-   1:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifndef __libfixmath_fix16_h__
-   2:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #define __libfixmath_fix16_h__
-   3:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-   4:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifdef __cplusplus
-   5:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern "C"
-   6:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** {
-   7:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #endif
-   8:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-   9:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /* These options may let the optimizer to remove some calls to the functions.
-  10:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****  * Refer to http://gcc.gnu.org/onlinedocs/gcc/Function-Attributes.html
-  11:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****  */
-  12:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifndef FIXMATH_FUNC_ATTRS
-  13:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** # ifdef __GNUC__
-  14:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #   if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 6)
-  15:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #     define FIXMATH_FUNC_ATTRS __attribute__((leaf, nothrow, const))
-  16:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #   else
-  17:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #     define FIXMATH_FUNC_ATTRS __attribute__((nothrow, const))
-  18:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #   endif
-  19:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** # else
-  20:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #   define FIXMATH_FUNC_ATTRS
-  21:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** # endif
-  22:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #endif
-  23:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  24:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #include <stdint.h>
-  25:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  26:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** typedef int32_t fix16_t;
-  27:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  28:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t FOUR_DIV_PI  = 0x145F3;            /*!< Fix16 value of 4/PI */
-  29:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t _FOUR_DIV_PI2 = 0xFFFF9840;        /*!< Fix16 value of -4/PI² */
-  30:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t X4_CORRECTION_COMPONENT = 0x399A; 	/*!< Fix16 value of 0.225 */
-  31:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t PI_DIV_4 = 0x0000C90F;             /*!< Fix16 value of PI/4 */
-  32:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t THREE_PI_DIV_4 = 0x00025B2F;       /*!< Fix16 value of 3PI/4 */
-  33:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  34:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t fix16_maximum  = 0x7FFFFFFF; /*!< the maximum value of fix16_t */
-  35:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t fix16_minimum  = 0x80000000; /*!< the minimum value of fix16_t */
-  36:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t fix16_overflow = 0x80000000; /*!< the value used to indicate overflows when FI
-  37:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  38:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t fix16_pi  = 205887;     /*!< fix16_t value of pi */
-  39:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t fix16_e   = 178145;     /*!< fix16_t value of e */
-  40:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t fix16_one = 0x00010000; /*!< fix16_t value of 1 */
-  41:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  42:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /* Conversion functions between fix16_t and float/integer.
-  43:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****  * These are inlined to allow compiler to optimize away constant numbers
-  44:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****  */
-  45:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_from_int(int a)     { return a * fix16_one; }
-  46:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline float   fix16_to_float(fix16_t a) { return (float)a / fix16_one; }
-  47:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline double  fix16_to_dbl(fix16_t a)   { return (double)a / fix16_one; }
-  48:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  49:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline int fix16_to_int(fix16_t a)
-  50:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** {
-  51:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifdef FIXMATH_NO_ROUNDING
-  52:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****     return (a >> 16);
-  53:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #else
-  54:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	if (a >= 0)
-  55:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 		return (a + (fix16_one >> 1)) / fix16_one;
-  56:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	return (a - (fix16_one >> 1)) / fix16_one;
-  57:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #endif
-  58:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** }
-  59:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  60:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_from_float(float a)
-  61:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** {
-  62:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	float temp = a * fix16_one;
-  63:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifndef FIXMATH_NO_ROUNDING
-  64:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	temp += (temp >= 0) ? 0.5f : -0.5f;
-  65:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #endif
-  66:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	return (fix16_t)temp;
-  67:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** }
-  68:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  69:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_from_dbl(double a)
-  70:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** {
-  71:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	double temp = a * fix16_one;
-  72:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifndef FIXMATH_NO_ROUNDING
-  73:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	temp += (temp >= 0) ? 0.5f : -0.5f;
-  74:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #endif
-  75:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	return (fix16_t)temp;
-  76:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** }
-  77:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  78:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /* Macro for defining fix16_t constant values.
-  79:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****    The functions above can't be used from e.g. global variable initializers,
-  80:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****    and their names are quite long also. This macro is useful for constants
-  81:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****    springled alongside code, e.g. F16(1.234).
-  82:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  83:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****    Note that the argument is evaluated multiple times, and also otherwise
-  84:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****    you should only use this for constant values. For runtime-conversions,
-  85:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h ****    use the functions above.
-  86:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
-  87:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #define F16(x) ((fix16_t)(((x) >= 0) ? ((x) * 65536.0 + 0.5) : ((x) * 65536.0 - 0.5)))
-  88:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
-  89:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_abs(fix16_t x)
-  90:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return (x < 0 ? -x : x); }
-  91:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_floor(fix16_t x)
-  92:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return (x & 0xFFFF0000UL); }
-  93:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_ceil(fix16_t x)
-  94:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return (x & 0xFFFF0000UL) + (x & 0x0000FFFFUL ? fix16_one : 0); }
-  95:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_min(fix16_t x, fix16_t y)
-  96:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return (x < y ? x : y); }
-  97:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_max(fix16_t x, fix16_t y)
-  98:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return (x > y ? x : y); }
-  99:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_clamp(fix16_t x, fix16_t lo, fix16_t hi)
- 100:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return fix16_min(fix16_max(x, lo), hi); }
- 101:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 102:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /* Subtraction and addition with (optional) overflow detection. */
- 103:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifdef FIXMATH_NO_OVERFLOW
- 104:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 105:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_add(fix16_t inArg0, fix16_t inArg1) { return (inArg0 + inArg1); }
- 106:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_sub(fix16_t inArg0, fix16_t inArg1) { return (inArg0 - inArg1); }
- 107:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 108:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #else
- 109:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 110:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_add(fix16_t a, fix16_t b) FIXMATH_FUNC_ATTRS;
- 111:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_sub(fix16_t a, fix16_t b) FIXMATH_FUNC_ATTRS;
- 112:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 113:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /* Saturating arithmetic */
- 114:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_sadd(fix16_t a, fix16_t b) FIXMATH_FUNC_ATTRS;
- 115:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_ssub(fix16_t a, fix16_t b) FIXMATH_FUNC_ATTRS;
- 116:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 117:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #endif
- 118:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 119:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Multiplies the two given fix16_t's and returns the result.
- 120:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 121:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_mul(fix16_t inArg0, fix16_t inArg1) FIXMATH_FUNC_ATTRS;
- 122:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 123:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Divides the first given fix16_t by the second and returns the result.
- 124:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 125:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_div(fix16_t inArg0, fix16_t inArg1) FIXMATH_FUNC_ATTRS;
- 126:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 127:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifndef FIXMATH_NO_OVERFLOW
- 128:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Performs a saturated multiplication (overflow-protected) of the two given fix16_t's and returns
- 129:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 130:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_smul(fix16_t inArg0, fix16_t inArg1) FIXMATH_FUNC_ATTRS;
- 131:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 132:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Performs a saturated division (overflow-protected) of the first fix16_t by the second and retur
- 133:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 134:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_sdiv(fix16_t inArg0, fix16_t inArg1) FIXMATH_FUNC_ATTRS;
- 135:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #endif
- 136:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 137:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Divides the first given fix16_t by the second and returns the result.
- 138:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 139:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_mod(fix16_t x, fix16_t y) FIXMATH_FUNC_ATTRS;
- 140:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 141:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 142:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 143:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the linear interpolation: (inArg0 * (1 - inFract)) + (inArg1 * inFract)
- 144:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 145:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_lerp8(fix16_t inArg0, fix16_t inArg1, uint8_t inFract) FIXMATH_FUNC_ATTRS;
- 146:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_lerp16(fix16_t inArg0, fix16_t inArg1, uint16_t inFract) FIXMATH_FUNC_ATTRS;
- 147:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #ifndef FIXMATH_NO_64BIT
- 148:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_lerp32(fix16_t inArg0, fix16_t inArg1, uint32_t inFract) FIXMATH_FUNC_ATTRS;
- 149:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** #endif
- 150:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 151:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 152:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 153:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the sine of the given fix16_t.
- 154:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 155:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_sin_parabola(fix16_t inAngle) FIXMATH_FUNC_ATTRS;
- 156:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 157:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the sine of the given fix16_t.
- 158:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 159:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_sin(fix16_t inAngle) FIXMATH_FUNC_ATTRS;
- 160:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 161:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the cosine of the given fix16_t.
- 162:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 163:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_cos(fix16_t inAngle) FIXMATH_FUNC_ATTRS;
- 164:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 165:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the tangent of the given fix16_t.
- 166:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 167:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_tan(fix16_t inAngle) FIXMATH_FUNC_ATTRS;
- 168:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 169:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the arcsine of the given fix16_t.
- 170:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 171:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_asin(fix16_t inValue) FIXMATH_FUNC_ATTRS;
- 172:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 173:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the arccosine of the given fix16_t.
- 174:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 175:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_acos(fix16_t inValue) FIXMATH_FUNC_ATTRS;
- 176:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 177:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the arctangent of the given fix16_t.
- 178:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 179:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_atan(fix16_t inValue) FIXMATH_FUNC_ATTRS;
- 180:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 181:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the arctangent of inY/inX.
- 182:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 183:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_atan2(fix16_t inY, fix16_t inX) FIXMATH_FUNC_ATTRS;
- 184:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 185:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t fix16_rad_to_deg_mult = 3754936;
- 186:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_rad_to_deg(fix16_t radians)
- 187:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return fix16_mul(radians, fix16_rad_to_deg_mult); }
- 188:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 189:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static const fix16_t fix16_deg_to_rad_mult = 1144;
- 190:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_deg_to_rad(fix16_t degrees)
- 191:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return fix16_mul(degrees, fix16_deg_to_rad_mult); }
- 192:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 193:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 194:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 195:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the square root of the given fix16_t.
- 196:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 197:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** extern fix16_t fix16_sqrt(fix16_t inValue) FIXMATH_FUNC_ATTRS;
- 198:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 
- 199:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** /*! Returns the square of the given fix16_t.
- 200:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** */
- 201:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** static inline fix16_t fix16_sq(fix16_t x)
- 202:/Users/legge/Development/moppen-game/shared/libfixmatrix/../libfixmath/fix16.h **** 	{ return fix16_mul(x, x); }
-  91              		.loc 1 202 0
-  92              		.cfi_startproc
-  93              		@ args = 0, pretend = 0, frame = 8
-  94              		@ frame_needed = 1, uses_anonymous_args = 0
-  95 0000 80B5     		push	{r7, lr}
-  96              		.cfi_def_cfa_offset 8
-  97              		.cfi_offset 7, -8
-  98              		.cfi_offset 14, -4
-  99 0002 82B0     		sub	sp, sp, #8
- 100              		.cfi_def_cfa_offset 16
- 101 0004 00AF     		add	r7, sp, #0
- 102              		.cfi_def_cfa_register 7
- 103 0006 7860     		str	r0, [r7, #4]
- 104              		.loc 1 202 0
- 105 0008 7A68     		ldr	r2, [r7, #4]
- 106 000a 7B68     		ldr	r3, [r7, #4]
- 107 000c 1100     		movs	r1, r2
- 108 000e 1800     		movs	r0, r3
- 109 0010 FFF7FEFF 		bl	fix16_mul
- 110 0014 0300     		movs	r3, r0
- 111 0016 1800     		movs	r0, r3
- 112 0018 BD46     		mov	sp, r7
- 113 001a 02B0     		add	sp, sp, #8
- 114              		@ sp needed
- 115 001c 80BD     		pop	{r7, pc}
- 116              		.cfi_endproc
- 117              	.LFE14:
- 119              		.align	1
- 120              		.syntax unified
- 121              		.code	16
- 122              		.thumb_func
- 123              		.fpu softvfp
- 125              	qf16_from_v3d:
- 126              	.LFB15:
- 127              		.file 2 "/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h"
-   1:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** /* Basic quaternion implementation based on libfixmath fix16_t datatype. */
-   2:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-   3:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** #ifndef _FIXQUAT_H_
-   4:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** #define _FIXQUAT_H_
-   5:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-   6:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** #include "../libfixmath/fix16.h"
-   7:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** #include "fixmatrix.h"
-   8:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** #include "fixvector3d.h"
-   9:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  10:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** typedef struct {
-  11:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     fix16_t a; // Real part
-  12:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     fix16_t b; // i
-  13:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     fix16_t c; // j
-  14:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     fix16_t d; // k
-  15:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** } qf16;
-  16:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  17:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Conjugate of quaternion
-  18:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_conj(qf16 *dest, const qf16 *q);
-  19:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  20:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Multiply two quaternions, dest = q * r.
-  21:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_mul(qf16 *dest, const qf16 *q, const qf16 *r);
-  22:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  23:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Add two quaternions, dest = q + r
-  24:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_add(qf16 *dest, const qf16 *q, const qf16 *r);
-  25:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  26:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Multiply quaternion by scalar
-  27:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_mul_s(qf16 *dest, const qf16 *q, fix16_t s);
-  28:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  29:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Divide quaternion by scalar
-  30:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_div_s(qf16 *dest, const qf16 *q, fix16_t s);
-  31:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  32:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Dot product of two quaternions
-  33:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** fix16_t qf16_dot(const qf16 *q, const qf16 *r);
-  34:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  35:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Quaternion norm
-  36:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** fix16_t qf16_norm(const qf16 *q);
-  37:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  38:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Normalize quaternion
-  39:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_normalize(qf16 *dest, const qf16 *q);
-  40:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  41:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Quaternion power (exponentation)
-  42:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_pow(qf16 *dest, const qf16 *q, fix16_t power);
-  43:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  44:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Weighted average of two quaternions
-  45:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Think of it as q = w * q1 + (1 - w) * q2, but the internal algorithm considers attitudes.
-  46:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_avg(qf16 *dest, const qf16 *q1, const qf16 *q2, fix16_t weight);
-  47:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  48:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Unit quaternion from axis and angle.
-  49:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Axis should have unit length and angle in radians.
-  50:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_from_axis_angle(qf16 *dest, const v3d *axis, fix16_t angle);
-  51:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  52:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Unit quaternion to rotation matrix
-  53:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_to_matrix(mf16 *dest, const qf16 *q);
-  54:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  55:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** // Rotate vector using quaternion
-  56:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** void qf16_rotate(v3d *dest, const qf16 *q, const v3d *v);
-  57:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  58:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** static inline void qf16_from_v3d(qf16 *q, const v3d *v, fix16_t a)
-  59:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** {
- 128              		.loc 2 59 0
- 129              		.cfi_startproc
- 130              		@ args = 0, pretend = 0, frame = 16
- 131              		@ frame_needed = 1, uses_anonymous_args = 0
- 132 001e 80B5     		push	{r7, lr}
- 133              		.cfi_def_cfa_offset 8
- 134              		.cfi_offset 7, -8
- 135              		.cfi_offset 14, -4
- 136 0020 84B0     		sub	sp, sp, #16
- 137              		.cfi_def_cfa_offset 24
- 138 0022 00AF     		add	r7, sp, #0
- 139              		.cfi_def_cfa_register 7
- 140 0024 F860     		str	r0, [r7, #12]
- 141 0026 B960     		str	r1, [r7, #8]
- 142 0028 7A60     		str	r2, [r7, #4]
-  60:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     q->a = a;
- 143              		.loc 2 60 0
- 144 002a FB68     		ldr	r3, [r7, #12]
- 145 002c 7A68     		ldr	r2, [r7, #4]
- 146 002e 1A60     		str	r2, [r3]
-  61:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     q->b = v->x;
- 147              		.loc 2 61 0
- 148 0030 BB68     		ldr	r3, [r7, #8]
- 149 0032 1A68     		ldr	r2, [r3]
- 150 0034 FB68     		ldr	r3, [r7, #12]
- 151 0036 5A60     		str	r2, [r3, #4]
-  62:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     q->c = v->y;
- 152              		.loc 2 62 0
- 153 0038 BB68     		ldr	r3, [r7, #8]
- 154 003a 5A68     		ldr	r2, [r3, #4]
- 155 003c FB68     		ldr	r3, [r7, #12]
- 156 003e 9A60     		str	r2, [r3, #8]
-  63:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     q->d = v->z;
- 157              		.loc 2 63 0
- 158 0040 BB68     		ldr	r3, [r7, #8]
- 159 0042 9A68     		ldr	r2, [r3, #8]
- 160 0044 FB68     		ldr	r3, [r7, #12]
- 161 0046 DA60     		str	r2, [r3, #12]
-  64:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** }
- 162              		.loc 2 64 0
- 163 0048 C046     		nop
- 164 004a BD46     		mov	sp, r7
- 165 004c 04B0     		add	sp, sp, #16
- 166              		@ sp needed
- 167 004e 80BD     		pop	{r7, pc}
- 168              		.cfi_endproc
- 169              	.LFE15:
- 171              		.align	1
- 172              		.syntax unified
- 173              		.code	16
- 174              		.thumb_func
- 175              		.fpu softvfp
- 177              	qf16_to_v3d:
- 178              	.LFB16:
-  65:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** 
-  66:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** static inline void qf16_to_v3d(v3d *v, const qf16 *q)
-  67:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** {
- 179              		.loc 2 67 0
- 180              		.cfi_startproc
- 181              		@ args = 0, pretend = 0, frame = 8
- 182              		@ frame_needed = 1, uses_anonymous_args = 0
- 183 0050 80B5     		push	{r7, lr}
- 184              		.cfi_def_cfa_offset 8
- 185              		.cfi_offset 7, -8
- 186              		.cfi_offset 14, -4
- 187 0052 82B0     		sub	sp, sp, #8
- 188              		.cfi_def_cfa_offset 16
- 189 0054 00AF     		add	r7, sp, #0
- 190              		.cfi_def_cfa_register 7
- 191 0056 7860     		str	r0, [r7, #4]
- 192 0058 3960     		str	r1, [r7]
-  68:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     v->x = q->b;
- 193              		.loc 2 68 0
- 194 005a 3B68     		ldr	r3, [r7]
- 195 005c 5A68     		ldr	r2, [r3, #4]
- 196 005e 7B68     		ldr	r3, [r7, #4]
- 197 0060 1A60     		str	r2, [r3]
-  69:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     v->y = q->c;
- 198              		.loc 2 69 0
- 199 0062 3B68     		ldr	r3, [r7]
- 200 0064 9A68     		ldr	r2, [r3, #8]
- 201 0066 7B68     		ldr	r3, [r7, #4]
- 202 0068 5A60     		str	r2, [r3, #4]
-  70:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h ****     v->z = q->d;
- 203              		.loc 2 70 0
- 204 006a 3B68     		ldr	r3, [r7]
- 205 006c DA68     		ldr	r2, [r3, #12]
- 206 006e 7B68     		ldr	r3, [r7, #4]
- 207 0070 9A60     		str	r2, [r3, #8]
-  71:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.h **** }
- 208              		.loc 2 71 0
- 209 0072 C046     		nop
- 210 0074 BD46     		mov	sp, r7
- 211 0076 02B0     		add	sp, sp, #8
- 212              		@ sp needed
- 213 0078 80BD     		pop	{r7, pc}
- 214              		.cfi_endproc
- 215              	.LFE16:
- 217              		.align	1
- 218              		.global	qf16_conj
- 219              		.syntax unified
- 220              		.code	16
- 221              		.thumb_func
- 222              		.fpu softvfp
- 224              	qf16_conj:
- 225              	.LFB17:
- 226              		.file 3 "/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c"
-   1:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** #include "fixquat.h"
-   2:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** #include "fixarray.h"
-   3:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-   4:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Conjugate of quaternion
-   5:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_conj(qf16 *dest, const qf16 *q)
-   6:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 227              		.loc 3 6 0
- 228              		.cfi_startproc
- 229              		@ args = 0, pretend = 0, frame = 8
- 230              		@ frame_needed = 1, uses_anonymous_args = 0
- 231 007a 80B5     		push	{r7, lr}
- 232              		.cfi_def_cfa_offset 8
- 233              		.cfi_offset 7, -8
- 234              		.cfi_offset 14, -4
- 235 007c 82B0     		sub	sp, sp, #8
- 236              		.cfi_def_cfa_offset 16
- 237 007e 00AF     		add	r7, sp, #0
- 238              		.cfi_def_cfa_register 7
- 239 0080 7860     		str	r0, [r7, #4]
- 240 0082 3960     		str	r1, [r7]
-   7:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->a = q->a;
- 241              		.loc 3 7 0
- 242 0084 3B68     		ldr	r3, [r7]
- 243 0086 1A68     		ldr	r2, [r3]
- 244 0088 7B68     		ldr	r3, [r7, #4]
- 245 008a 1A60     		str	r2, [r3]
-   8:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->b = - q->b;
- 246              		.loc 3 8 0
- 247 008c 3B68     		ldr	r3, [r7]
- 248 008e 5B68     		ldr	r3, [r3, #4]
- 249 0090 5A42     		rsbs	r2, r3, #0
- 250 0092 7B68     		ldr	r3, [r7, #4]
- 251 0094 5A60     		str	r2, [r3, #4]
-   9:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->c = - q->c;
- 252              		.loc 3 9 0
- 253 0096 3B68     		ldr	r3, [r7]
- 254 0098 9B68     		ldr	r3, [r3, #8]
- 255 009a 5A42     		rsbs	r2, r3, #0
- 256 009c 7B68     		ldr	r3, [r7, #4]
- 257 009e 9A60     		str	r2, [r3, #8]
-  10:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->d = - q->d;
- 258              		.loc 3 10 0
- 259 00a0 3B68     		ldr	r3, [r7]
- 260 00a2 DB68     		ldr	r3, [r3, #12]
- 261 00a4 5A42     		rsbs	r2, r3, #0
- 262 00a6 7B68     		ldr	r3, [r7, #4]
- 263 00a8 DA60     		str	r2, [r3, #12]
-  11:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 264              		.loc 3 11 0
- 265 00aa C046     		nop
- 266 00ac BD46     		mov	sp, r7
- 267 00ae 02B0     		add	sp, sp, #8
- 268              		@ sp needed
- 269 00b0 80BD     		pop	{r7, pc}
- 270              		.cfi_endproc
- 271              	.LFE17:
- 273              		.align	1
- 274              		.global	qf16_mul
- 275              		.syntax unified
- 276              		.code	16
- 277              		.thumb_func
- 278              		.fpu softvfp
- 280              	qf16_mul:
- 281              	.LFB18:
-  12:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  13:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Multiply two quaternions, dest = a * b.
-  14:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_mul(qf16 *dest, const qf16 *q, const qf16 *r)
-  15:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 282              		.loc 3 15 0
- 283              		.cfi_startproc
- 284              		@ args = 0, pretend = 0, frame = 32
- 285              		@ frame_needed = 1, uses_anonymous_args = 0
- 286 00b2 90B5     		push	{r4, r7, lr}
- 287              		.cfi_def_cfa_offset 12
- 288              		.cfi_offset 4, -12
- 289              		.cfi_offset 7, -8
- 290              		.cfi_offset 14, -4
- 291 00b4 8BB0     		sub	sp, sp, #44
- 292              		.cfi_def_cfa_offset 56
- 293 00b6 02AF     		add	r7, sp, #8
- 294              		.cfi_def_cfa 7, 48
- 295 00b8 F860     		str	r0, [r7, #12]
- 296 00ba B960     		str	r1, [r7, #8]
- 297 00bc 7A60     		str	r2, [r7, #4]
-  16:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16 tmp;
-  17:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     fa16_unalias(dest, (void**)&q, (void**)&r, &tmp, sizeof(tmp));
- 298              		.loc 3 17 0
- 299 00be 1023     		movs	r3, #16
- 300 00c0 FC18     		adds	r4, r7, r3
- 301 00c2 3A1D     		adds	r2, r7, #4
- 302 00c4 0823     		movs	r3, #8
- 303 00c6 F918     		adds	r1, r7, r3
- 304 00c8 F868     		ldr	r0, [r7, #12]
- 305 00ca 1023     		movs	r3, #16
- 306 00cc 0093     		str	r3, [sp]
- 307 00ce 2300     		movs	r3, r4
- 308 00d0 FFF7FEFF 		bl	fa16_unalias
-  18:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
-  19:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->a = fix16_mul(q->a, r->a) - fix16_mul(q->b, r->b) - fix16_mul(q->c, r->c) - fix16_mul(q->
- 309              		.loc 3 19 0
- 310 00d4 BB68     		ldr	r3, [r7, #8]
- 311 00d6 1A68     		ldr	r2, [r3]
- 312 00d8 7B68     		ldr	r3, [r7, #4]
- 313 00da 1B68     		ldr	r3, [r3]
- 314 00dc 1900     		movs	r1, r3
- 315 00de 1000     		movs	r0, r2
- 316 00e0 FFF7FEFF 		bl	fix16_mul
- 317 00e4 0400     		movs	r4, r0
- 318 00e6 BB68     		ldr	r3, [r7, #8]
- 319 00e8 5A68     		ldr	r2, [r3, #4]
- 320 00ea 7B68     		ldr	r3, [r7, #4]
- 321 00ec 5B68     		ldr	r3, [r3, #4]
- 322 00ee 1900     		movs	r1, r3
- 323 00f0 1000     		movs	r0, r2
- 324 00f2 FFF7FEFF 		bl	fix16_mul
- 325 00f6 0300     		movs	r3, r0
- 326 00f8 E41A     		subs	r4, r4, r3
- 327 00fa BB68     		ldr	r3, [r7, #8]
- 328 00fc 9A68     		ldr	r2, [r3, #8]
- 329 00fe 7B68     		ldr	r3, [r7, #4]
- 330 0100 9B68     		ldr	r3, [r3, #8]
- 331 0102 1900     		movs	r1, r3
- 332 0104 1000     		movs	r0, r2
- 333 0106 FFF7FEFF 		bl	fix16_mul
- 334 010a 0300     		movs	r3, r0
- 335 010c E41A     		subs	r4, r4, r3
- 336 010e BB68     		ldr	r3, [r7, #8]
- 337 0110 DA68     		ldr	r2, [r3, #12]
- 338 0112 7B68     		ldr	r3, [r7, #4]
- 339 0114 DB68     		ldr	r3, [r3, #12]
- 340 0116 1900     		movs	r1, r3
- 341 0118 1000     		movs	r0, r2
- 342 011a FFF7FEFF 		bl	fix16_mul
- 343 011e 0300     		movs	r3, r0
- 344 0120 E21A     		subs	r2, r4, r3
- 345 0122 FB68     		ldr	r3, [r7, #12]
- 346 0124 1A60     		str	r2, [r3]
-  20:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->b = fix16_mul(q->a, r->b) + fix16_mul(q->b, r->a) + fix16_mul(q->c, r->d) - fix16_mul(q->
- 347              		.loc 3 20 0
- 348 0126 BB68     		ldr	r3, [r7, #8]
- 349 0128 1A68     		ldr	r2, [r3]
- 350 012a 7B68     		ldr	r3, [r7, #4]
- 351 012c 5B68     		ldr	r3, [r3, #4]
- 352 012e 1900     		movs	r1, r3
- 353 0130 1000     		movs	r0, r2
- 354 0132 FFF7FEFF 		bl	fix16_mul
- 355 0136 0400     		movs	r4, r0
- 356 0138 BB68     		ldr	r3, [r7, #8]
- 357 013a 5A68     		ldr	r2, [r3, #4]
- 358 013c 7B68     		ldr	r3, [r7, #4]
- 359 013e 1B68     		ldr	r3, [r3]
- 360 0140 1900     		movs	r1, r3
- 361 0142 1000     		movs	r0, r2
- 362 0144 FFF7FEFF 		bl	fix16_mul
- 363 0148 0300     		movs	r3, r0
- 364 014a E418     		adds	r4, r4, r3
- 365 014c BB68     		ldr	r3, [r7, #8]
- 366 014e 9A68     		ldr	r2, [r3, #8]
- 367 0150 7B68     		ldr	r3, [r7, #4]
- 368 0152 DB68     		ldr	r3, [r3, #12]
- 369 0154 1900     		movs	r1, r3
- 370 0156 1000     		movs	r0, r2
- 371 0158 FFF7FEFF 		bl	fix16_mul
- 372 015c 0300     		movs	r3, r0
- 373 015e E418     		adds	r4, r4, r3
- 374 0160 BB68     		ldr	r3, [r7, #8]
- 375 0162 DA68     		ldr	r2, [r3, #12]
- 376 0164 7B68     		ldr	r3, [r7, #4]
- 377 0166 9B68     		ldr	r3, [r3, #8]
- 378 0168 1900     		movs	r1, r3
- 379 016a 1000     		movs	r0, r2
- 380 016c FFF7FEFF 		bl	fix16_mul
- 381 0170 0300     		movs	r3, r0
- 382 0172 E21A     		subs	r2, r4, r3
- 383 0174 FB68     		ldr	r3, [r7, #12]
- 384 0176 5A60     		str	r2, [r3, #4]
-  21:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->c = fix16_mul(q->a, r->c) - fix16_mul(q->b, r->d) + fix16_mul(q->c, r->a) + fix16_mul(q->
- 385              		.loc 3 21 0
- 386 0178 BB68     		ldr	r3, [r7, #8]
- 387 017a 1A68     		ldr	r2, [r3]
- 388 017c 7B68     		ldr	r3, [r7, #4]
- 389 017e 9B68     		ldr	r3, [r3, #8]
- 390 0180 1900     		movs	r1, r3
- 391 0182 1000     		movs	r0, r2
- 392 0184 FFF7FEFF 		bl	fix16_mul
- 393 0188 0400     		movs	r4, r0
- 394 018a BB68     		ldr	r3, [r7, #8]
- 395 018c 5A68     		ldr	r2, [r3, #4]
- 396 018e 7B68     		ldr	r3, [r7, #4]
- 397 0190 DB68     		ldr	r3, [r3, #12]
- 398 0192 1900     		movs	r1, r3
- 399 0194 1000     		movs	r0, r2
- 400 0196 FFF7FEFF 		bl	fix16_mul
- 401 019a 0300     		movs	r3, r0
- 402 019c E41A     		subs	r4, r4, r3
- 403 019e BB68     		ldr	r3, [r7, #8]
- 404 01a0 9A68     		ldr	r2, [r3, #8]
- 405 01a2 7B68     		ldr	r3, [r7, #4]
- 406 01a4 1B68     		ldr	r3, [r3]
- 407 01a6 1900     		movs	r1, r3
- 408 01a8 1000     		movs	r0, r2
- 409 01aa FFF7FEFF 		bl	fix16_mul
- 410 01ae 0300     		movs	r3, r0
- 411 01b0 E418     		adds	r4, r4, r3
- 412 01b2 BB68     		ldr	r3, [r7, #8]
- 413 01b4 DA68     		ldr	r2, [r3, #12]
- 414 01b6 7B68     		ldr	r3, [r7, #4]
- 415 01b8 5B68     		ldr	r3, [r3, #4]
- 416 01ba 1900     		movs	r1, r3
- 417 01bc 1000     		movs	r0, r2
- 418 01be FFF7FEFF 		bl	fix16_mul
- 419 01c2 0300     		movs	r3, r0
- 420 01c4 E218     		adds	r2, r4, r3
- 421 01c6 FB68     		ldr	r3, [r7, #12]
- 422 01c8 9A60     		str	r2, [r3, #8]
-  22:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->d = fix16_mul(q->a, r->d) + fix16_mul(q->b, r->c) - fix16_mul(q->c, r->b) + fix16_mul(q->
- 423              		.loc 3 22 0
- 424 01ca BB68     		ldr	r3, [r7, #8]
- 425 01cc 1A68     		ldr	r2, [r3]
- 426 01ce 7B68     		ldr	r3, [r7, #4]
- 427 01d0 DB68     		ldr	r3, [r3, #12]
- 428 01d2 1900     		movs	r1, r3
- 429 01d4 1000     		movs	r0, r2
- 430 01d6 FFF7FEFF 		bl	fix16_mul
- 431 01da 0400     		movs	r4, r0
- 432 01dc BB68     		ldr	r3, [r7, #8]
- 433 01de 5A68     		ldr	r2, [r3, #4]
- 434 01e0 7B68     		ldr	r3, [r7, #4]
- 435 01e2 9B68     		ldr	r3, [r3, #8]
- 436 01e4 1900     		movs	r1, r3
- 437 01e6 1000     		movs	r0, r2
- 438 01e8 FFF7FEFF 		bl	fix16_mul
- 439 01ec 0300     		movs	r3, r0
- 440 01ee E418     		adds	r4, r4, r3
- 441 01f0 BB68     		ldr	r3, [r7, #8]
- 442 01f2 9A68     		ldr	r2, [r3, #8]
- 443 01f4 7B68     		ldr	r3, [r7, #4]
- 444 01f6 5B68     		ldr	r3, [r3, #4]
- 445 01f8 1900     		movs	r1, r3
- 446 01fa 1000     		movs	r0, r2
- 447 01fc FFF7FEFF 		bl	fix16_mul
- 448 0200 0300     		movs	r3, r0
- 449 0202 E41A     		subs	r4, r4, r3
- 450 0204 BB68     		ldr	r3, [r7, #8]
- 451 0206 DA68     		ldr	r2, [r3, #12]
- 452 0208 7B68     		ldr	r3, [r7, #4]
- 453 020a 1B68     		ldr	r3, [r3]
- 454 020c 1900     		movs	r1, r3
- 455 020e 1000     		movs	r0, r2
- 456 0210 FFF7FEFF 		bl	fix16_mul
- 457 0214 0300     		movs	r3, r0
- 458 0216 E218     		adds	r2, r4, r3
- 459 0218 FB68     		ldr	r3, [r7, #12]
- 460 021a DA60     		str	r2, [r3, #12]
-  23:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 461              		.loc 3 23 0
- 462 021c C046     		nop
- 463 021e BD46     		mov	sp, r7
- 464 0220 09B0     		add	sp, sp, #36
- 465              		@ sp needed
- 466 0222 90BD     		pop	{r4, r7, pc}
- 467              		.cfi_endproc
- 468              	.LFE18:
- 470              		.align	1
- 471              		.global	qf16_add
- 472              		.syntax unified
- 473              		.code	16
- 474              		.thumb_func
- 475              		.fpu softvfp
- 477              	qf16_add:
- 478              	.LFB19:
-  24:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  25:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_add(qf16 *dest, const qf16 *q, const qf16 *r)
-  26:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 479              		.loc 3 26 0
- 480              		.cfi_startproc
- 481              		@ args = 0, pretend = 0, frame = 16
- 482              		@ frame_needed = 1, uses_anonymous_args = 0
- 483 0224 80B5     		push	{r7, lr}
- 484              		.cfi_def_cfa_offset 8
- 485              		.cfi_offset 7, -8
- 486              		.cfi_offset 14, -4
- 487 0226 84B0     		sub	sp, sp, #16
- 488              		.cfi_def_cfa_offset 24
- 489 0228 00AF     		add	r7, sp, #0
- 490              		.cfi_def_cfa_register 7
- 491 022a F860     		str	r0, [r7, #12]
- 492 022c B960     		str	r1, [r7, #8]
- 493 022e 7A60     		str	r2, [r7, #4]
-  27:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->a = q->a + r->a;
- 494              		.loc 3 27 0
- 495 0230 BB68     		ldr	r3, [r7, #8]
- 496 0232 1A68     		ldr	r2, [r3]
- 497 0234 7B68     		ldr	r3, [r7, #4]
- 498 0236 1B68     		ldr	r3, [r3]
- 499 0238 D218     		adds	r2, r2, r3
- 500 023a FB68     		ldr	r3, [r7, #12]
- 501 023c 1A60     		str	r2, [r3]
-  28:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->b = q->b + r->b;
- 502              		.loc 3 28 0
- 503 023e BB68     		ldr	r3, [r7, #8]
- 504 0240 5A68     		ldr	r2, [r3, #4]
- 505 0242 7B68     		ldr	r3, [r7, #4]
- 506 0244 5B68     		ldr	r3, [r3, #4]
- 507 0246 D218     		adds	r2, r2, r3
- 508 0248 FB68     		ldr	r3, [r7, #12]
- 509 024a 5A60     		str	r2, [r3, #4]
-  29:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->c = q->c + r->c;
- 510              		.loc 3 29 0
- 511 024c BB68     		ldr	r3, [r7, #8]
- 512 024e 9A68     		ldr	r2, [r3, #8]
- 513 0250 7B68     		ldr	r3, [r7, #4]
- 514 0252 9B68     		ldr	r3, [r3, #8]
- 515 0254 D218     		adds	r2, r2, r3
- 516 0256 FB68     		ldr	r3, [r7, #12]
- 517 0258 9A60     		str	r2, [r3, #8]
-  30:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->d = q->d + r->d;
- 518              		.loc 3 30 0
- 519 025a BB68     		ldr	r3, [r7, #8]
- 520 025c DA68     		ldr	r2, [r3, #12]
- 521 025e 7B68     		ldr	r3, [r7, #4]
- 522 0260 DB68     		ldr	r3, [r3, #12]
- 523 0262 D218     		adds	r2, r2, r3
- 524 0264 FB68     		ldr	r3, [r7, #12]
- 525 0266 DA60     		str	r2, [r3, #12]
-  31:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 526              		.loc 3 31 0
- 527 0268 C046     		nop
- 528 026a BD46     		mov	sp, r7
- 529 026c 04B0     		add	sp, sp, #16
- 530              		@ sp needed
- 531 026e 80BD     		pop	{r7, pc}
- 532              		.cfi_endproc
- 533              	.LFE19:
- 535              		.align	1
- 536              		.global	qf16_mul_s
- 537              		.syntax unified
- 538              		.code	16
- 539              		.thumb_func
- 540              		.fpu softvfp
- 542              	qf16_mul_s:
- 543              	.LFB20:
-  32:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  33:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Multiply quaternion by scalar
-  34:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_mul_s(qf16 *dest, const qf16 *q, fix16_t s)
-  35:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 544              		.loc 3 35 0
- 545              		.cfi_startproc
- 546              		@ args = 0, pretend = 0, frame = 16
- 547              		@ frame_needed = 1, uses_anonymous_args = 0
- 548 0270 80B5     		push	{r7, lr}
- 549              		.cfi_def_cfa_offset 8
- 550              		.cfi_offset 7, -8
- 551              		.cfi_offset 14, -4
- 552 0272 84B0     		sub	sp, sp, #16
- 553              		.cfi_def_cfa_offset 24
- 554 0274 00AF     		add	r7, sp, #0
- 555              		.cfi_def_cfa_register 7
- 556 0276 F860     		str	r0, [r7, #12]
- 557 0278 B960     		str	r1, [r7, #8]
- 558 027a 7A60     		str	r2, [r7, #4]
-  36:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->a = fix16_mul(q->a, s);
- 559              		.loc 3 36 0
- 560 027c BB68     		ldr	r3, [r7, #8]
- 561 027e 1B68     		ldr	r3, [r3]
- 562 0280 7A68     		ldr	r2, [r7, #4]
- 563 0282 1100     		movs	r1, r2
- 564 0284 1800     		movs	r0, r3
- 565 0286 FFF7FEFF 		bl	fix16_mul
- 566 028a 0200     		movs	r2, r0
- 567 028c FB68     		ldr	r3, [r7, #12]
- 568 028e 1A60     		str	r2, [r3]
-  37:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->b = fix16_mul(q->b, s);
- 569              		.loc 3 37 0
- 570 0290 BB68     		ldr	r3, [r7, #8]
- 571 0292 5B68     		ldr	r3, [r3, #4]
- 572 0294 7A68     		ldr	r2, [r7, #4]
- 573 0296 1100     		movs	r1, r2
- 574 0298 1800     		movs	r0, r3
- 575 029a FFF7FEFF 		bl	fix16_mul
- 576 029e 0200     		movs	r2, r0
- 577 02a0 FB68     		ldr	r3, [r7, #12]
- 578 02a2 5A60     		str	r2, [r3, #4]
-  38:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->c = fix16_mul(q->c, s);
- 579              		.loc 3 38 0
- 580 02a4 BB68     		ldr	r3, [r7, #8]
- 581 02a6 9B68     		ldr	r3, [r3, #8]
- 582 02a8 7A68     		ldr	r2, [r7, #4]
- 583 02aa 1100     		movs	r1, r2
- 584 02ac 1800     		movs	r0, r3
- 585 02ae FFF7FEFF 		bl	fix16_mul
- 586 02b2 0200     		movs	r2, r0
- 587 02b4 FB68     		ldr	r3, [r7, #12]
- 588 02b6 9A60     		str	r2, [r3, #8]
-  39:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->d = fix16_mul(q->d, s);
- 589              		.loc 3 39 0
- 590 02b8 BB68     		ldr	r3, [r7, #8]
- 591 02ba DB68     		ldr	r3, [r3, #12]
- 592 02bc 7A68     		ldr	r2, [r7, #4]
- 593 02be 1100     		movs	r1, r2
- 594 02c0 1800     		movs	r0, r3
- 595 02c2 FFF7FEFF 		bl	fix16_mul
- 596 02c6 0200     		movs	r2, r0
- 597 02c8 FB68     		ldr	r3, [r7, #12]
- 598 02ca DA60     		str	r2, [r3, #12]
-  40:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 599              		.loc 3 40 0
- 600 02cc C046     		nop
- 601 02ce BD46     		mov	sp, r7
- 602 02d0 04B0     		add	sp, sp, #16
- 603              		@ sp needed
- 604 02d2 80BD     		pop	{r7, pc}
- 605              		.cfi_endproc
- 606              	.LFE20:
- 608              		.align	1
- 609              		.global	qf16_div_s
- 610              		.syntax unified
- 611              		.code	16
- 612              		.thumb_func
- 613              		.fpu softvfp
- 615              	qf16_div_s:
- 616              	.LFB21:
-  41:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  42:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Divide quaternion by scalar
-  43:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_div_s(qf16 *dest, const qf16 *q, fix16_t s)
-  44:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 617              		.loc 3 44 0
- 618              		.cfi_startproc
- 619              		@ args = 0, pretend = 0, frame = 16
- 620              		@ frame_needed = 1, uses_anonymous_args = 0
- 621 02d4 80B5     		push	{r7, lr}
- 622              		.cfi_def_cfa_offset 8
- 623              		.cfi_offset 7, -8
- 624              		.cfi_offset 14, -4
- 625 02d6 84B0     		sub	sp, sp, #16
- 626              		.cfi_def_cfa_offset 24
- 627 02d8 00AF     		add	r7, sp, #0
- 628              		.cfi_def_cfa_register 7
- 629 02da F860     		str	r0, [r7, #12]
- 630 02dc B960     		str	r1, [r7, #8]
- 631 02de 7A60     		str	r2, [r7, #4]
-  45:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->a = fix16_div(q->a, s);
- 632              		.loc 3 45 0
- 633 02e0 BB68     		ldr	r3, [r7, #8]
- 634 02e2 1B68     		ldr	r3, [r3]
- 635 02e4 7A68     		ldr	r2, [r7, #4]
- 636 02e6 1100     		movs	r1, r2
- 637 02e8 1800     		movs	r0, r3
- 638 02ea FFF7FEFF 		bl	fix16_div
- 639 02ee 0200     		movs	r2, r0
- 640 02f0 FB68     		ldr	r3, [r7, #12]
- 641 02f2 1A60     		str	r2, [r3]
-  46:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->b = fix16_div(q->b, s);
- 642              		.loc 3 46 0
- 643 02f4 BB68     		ldr	r3, [r7, #8]
- 644 02f6 5B68     		ldr	r3, [r3, #4]
- 645 02f8 7A68     		ldr	r2, [r7, #4]
- 646 02fa 1100     		movs	r1, r2
- 647 02fc 1800     		movs	r0, r3
- 648 02fe FFF7FEFF 		bl	fix16_div
- 649 0302 0200     		movs	r2, r0
- 650 0304 FB68     		ldr	r3, [r7, #12]
- 651 0306 5A60     		str	r2, [r3, #4]
-  47:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->c = fix16_div(q->c, s);
- 652              		.loc 3 47 0
- 653 0308 BB68     		ldr	r3, [r7, #8]
- 654 030a 9B68     		ldr	r3, [r3, #8]
- 655 030c 7A68     		ldr	r2, [r7, #4]
- 656 030e 1100     		movs	r1, r2
- 657 0310 1800     		movs	r0, r3
- 658 0312 FFF7FEFF 		bl	fix16_div
- 659 0316 0200     		movs	r2, r0
- 660 0318 FB68     		ldr	r3, [r7, #12]
- 661 031a 9A60     		str	r2, [r3, #8]
-  48:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->d = fix16_div(q->d, s);
- 662              		.loc 3 48 0
- 663 031c BB68     		ldr	r3, [r7, #8]
- 664 031e DB68     		ldr	r3, [r3, #12]
- 665 0320 7A68     		ldr	r2, [r7, #4]
- 666 0322 1100     		movs	r1, r2
- 667 0324 1800     		movs	r0, r3
- 668 0326 FFF7FEFF 		bl	fix16_div
- 669 032a 0200     		movs	r2, r0
- 670 032c FB68     		ldr	r3, [r7, #12]
- 671 032e DA60     		str	r2, [r3, #12]
-  49:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 672              		.loc 3 49 0
- 673 0330 C046     		nop
- 674 0332 BD46     		mov	sp, r7
- 675 0334 04B0     		add	sp, sp, #16
- 676              		@ sp needed
- 677 0336 80BD     		pop	{r7, pc}
- 678              		.cfi_endproc
- 679              	.LFE21:
- 681              		.align	1
- 682              		.global	qf16_dot
- 683              		.syntax unified
- 684              		.code	16
- 685              		.thumb_func
- 686              		.fpu softvfp
- 688              	qf16_dot:
- 689              	.LFB22:
-  50:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  51:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** fix16_t qf16_dot(const qf16 *q, const qf16 *r)
-  52:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 690              		.loc 3 52 0
- 691              		.cfi_startproc
- 692              		@ args = 0, pretend = 0, frame = 8
- 693              		@ frame_needed = 1, uses_anonymous_args = 0
- 694 0338 80B5     		push	{r7, lr}
- 695              		.cfi_def_cfa_offset 8
- 696              		.cfi_offset 7, -8
- 697              		.cfi_offset 14, -4
- 698 033a 84B0     		sub	sp, sp, #16
- 699              		.cfi_def_cfa_offset 24
- 700 033c 02AF     		add	r7, sp, #8
- 701              		.cfi_def_cfa 7, 16
- 702 033e 7860     		str	r0, [r7, #4]
- 703 0340 3960     		str	r1, [r7]
-  53:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     return fa16_dot(&q->a, &q->b - &q->a, &r->a, &r->b - &r->a, 4);    
- 704              		.loc 3 53 0
- 705 0342 7868     		ldr	r0, [r7, #4]
- 706 0344 3A68     		ldr	r2, [r7]
- 707 0346 0423     		movs	r3, #4
- 708 0348 0093     		str	r3, [sp]
- 709 034a 0123     		movs	r3, #1
- 710 034c 0121     		movs	r1, #1
- 711 034e FFF7FEFF 		bl	fa16_dot
- 712 0352 0300     		movs	r3, r0
-  54:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 713              		.loc 3 54 0
- 714 0354 1800     		movs	r0, r3
- 715 0356 BD46     		mov	sp, r7
- 716 0358 02B0     		add	sp, sp, #8
- 717              		@ sp needed
- 718 035a 80BD     		pop	{r7, pc}
- 719              		.cfi_endproc
- 720              	.LFE22:
- 722              		.align	1
- 723              		.global	qf16_norm
- 724              		.syntax unified
- 725              		.code	16
- 726              		.thumb_func
- 727              		.fpu softvfp
- 729              	qf16_norm:
- 730              	.LFB23:
-  55:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  56:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Quaternion norm
-  57:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** fix16_t qf16_norm(const qf16 *q)
-  58:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 731              		.loc 3 58 0
- 732              		.cfi_startproc
- 733              		@ args = 0, pretend = 0, frame = 8
- 734              		@ frame_needed = 1, uses_anonymous_args = 0
- 735 035c 80B5     		push	{r7, lr}
- 736              		.cfi_def_cfa_offset 8
- 737              		.cfi_offset 7, -8
- 738              		.cfi_offset 14, -4
- 739 035e 82B0     		sub	sp, sp, #8
- 740              		.cfi_def_cfa_offset 16
- 741 0360 00AF     		add	r7, sp, #0
- 742              		.cfi_def_cfa_register 7
- 743 0362 7860     		str	r0, [r7, #4]
-  59:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     return fa16_norm(&q->a, &q->b - &q->a, 4);
- 744              		.loc 3 59 0
- 745 0364 7B68     		ldr	r3, [r7, #4]
- 746 0366 0422     		movs	r2, #4
- 747 0368 0121     		movs	r1, #1
- 748 036a 1800     		movs	r0, r3
- 749 036c FFF7FEFF 		bl	fa16_norm
- 750 0370 0300     		movs	r3, r0
-  60:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 751              		.loc 3 60 0
- 752 0372 1800     		movs	r0, r3
- 753 0374 BD46     		mov	sp, r7
- 754 0376 02B0     		add	sp, sp, #8
- 755              		@ sp needed
- 756 0378 80BD     		pop	{r7, pc}
- 757              		.cfi_endproc
- 758              	.LFE23:
- 760              		.align	1
- 761              		.global	qf16_normalize
- 762              		.syntax unified
- 763              		.code	16
- 764              		.thumb_func
- 765              		.fpu softvfp
- 767              	qf16_normalize:
- 768              	.LFB24:
-  61:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  62:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Normalize quaternion
-  63:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_normalize(qf16 *dest, const qf16 *q)
-  64:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 769              		.loc 3 64 0
- 770              		.cfi_startproc
- 771              		@ args = 0, pretend = 0, frame = 8
- 772              		@ frame_needed = 1, uses_anonymous_args = 0
- 773 037a 80B5     		push	{r7, lr}
- 774              		.cfi_def_cfa_offset 8
- 775              		.cfi_offset 7, -8
- 776              		.cfi_offset 14, -4
- 777 037c 82B0     		sub	sp, sp, #8
- 778              		.cfi_def_cfa_offset 16
- 779 037e 00AF     		add	r7, sp, #0
- 780              		.cfi_def_cfa_register 7
- 781 0380 7860     		str	r0, [r7, #4]
- 782 0382 3960     		str	r1, [r7]
-  65:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_div_s(dest, q, qf16_norm(q));
- 783              		.loc 3 65 0
- 784 0384 3B68     		ldr	r3, [r7]
- 785 0386 1800     		movs	r0, r3
- 786 0388 FFF7FEFF 		bl	qf16_norm
- 787 038c 0200     		movs	r2, r0
- 788 038e 3968     		ldr	r1, [r7]
- 789 0390 7B68     		ldr	r3, [r7, #4]
- 790 0392 1800     		movs	r0, r3
- 791 0394 FFF7FEFF 		bl	qf16_div_s
-  66:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 792              		.loc 3 66 0
- 793 0398 C046     		nop
- 794 039a BD46     		mov	sp, r7
- 795 039c 02B0     		add	sp, sp, #8
- 796              		@ sp needed
- 797 039e 80BD     		pop	{r7, pc}
- 798              		.cfi_endproc
- 799              	.LFE24:
- 801              		.align	1
- 802              		.global	qf16_pow
- 803              		.syntax unified
- 804              		.code	16
- 805              		.thumb_func
- 806              		.fpu softvfp
- 808              	qf16_pow:
- 809              	.LFB25:
-  67:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  68:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Quaternion power
-  69:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_pow(qf16 *dest, const qf16 *q, fix16_t power)
-  70:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 810              		.loc 3 70 0
- 811              		.cfi_startproc
- 812              		@ args = 0, pretend = 0, frame = 32
- 813              		@ frame_needed = 1, uses_anonymous_args = 0
- 814 03a0 90B5     		push	{r4, r7, lr}
- 815              		.cfi_def_cfa_offset 12
- 816              		.cfi_offset 4, -12
- 817              		.cfi_offset 7, -8
- 818              		.cfi_offset 14, -4
- 819 03a2 89B0     		sub	sp, sp, #36
- 820              		.cfi_def_cfa_offset 48
- 821 03a4 00AF     		add	r7, sp, #0
- 822              		.cfi_def_cfa_register 7
- 823 03a6 F860     		str	r0, [r7, #12]
- 824 03a8 B960     		str	r1, [r7, #8]
- 825 03aa 7A60     		str	r2, [r7, #4]
-  71:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     fix16_t old_half_angle = fix16_acos(q->a);
- 826              		.loc 3 71 0
- 827 03ac BB68     		ldr	r3, [r7, #8]
- 828 03ae 1B68     		ldr	r3, [r3]
- 829 03b0 1800     		movs	r0, r3
- 830 03b2 FFF7FEFF 		bl	fix16_acos
- 831 03b6 0300     		movs	r3, r0
- 832 03b8 BB61     		str	r3, [r7, #24]
-  72:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     fix16_t new_half_angle = fix16_mul(old_half_angle, power);
- 833              		.loc 3 72 0
- 834 03ba 7A68     		ldr	r2, [r7, #4]
- 835 03bc BB69     		ldr	r3, [r7, #24]
- 836 03be 1100     		movs	r1, r2
- 837 03c0 1800     		movs	r0, r3
- 838 03c2 FFF7FEFF 		bl	fix16_mul
- 839 03c6 0300     		movs	r3, r0
- 840 03c8 7B61     		str	r3, [r7, #20]
-  73:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     fix16_t multiplier = 0;
- 841              		.loc 3 73 0
- 842 03ca 0023     		movs	r3, #0
- 843 03cc FB61     		str	r3, [r7, #28]
-  74:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
-  75:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     if (old_half_angle > 10) // Guard against almost-zero divider
- 844              		.loc 3 75 0
- 845 03ce BB69     		ldr	r3, [r7, #24]
- 846 03d0 0A2B     		cmp	r3, #10
- 847 03d2 0FDD     		ble	.L16
-  76:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     {
-  77:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****         multiplier = fix16_div(fix16_sin(new_half_angle),
- 848              		.loc 3 77 0
- 849 03d4 7B69     		ldr	r3, [r7, #20]
- 850 03d6 1800     		movs	r0, r3
- 851 03d8 FFF7FEFF 		bl	fix16_sin
- 852 03dc 0400     		movs	r4, r0
- 853 03de BB69     		ldr	r3, [r7, #24]
- 854 03e0 1800     		movs	r0, r3
- 855 03e2 FFF7FEFF 		bl	fix16_sin
- 856 03e6 0300     		movs	r3, r0
- 857 03e8 1900     		movs	r1, r3
- 858 03ea 2000     		movs	r0, r4
- 859 03ec FFF7FEFF 		bl	fix16_div
- 860 03f0 0300     		movs	r3, r0
- 861 03f2 FB61     		str	r3, [r7, #28]
- 862              	.L16:
-  78:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****                                fix16_sin(old_half_angle));
-  79:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     }
-  80:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
-  81:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->a = fix16_cos(new_half_angle);
- 863              		.loc 3 81 0
- 864 03f4 7B69     		ldr	r3, [r7, #20]
- 865 03f6 1800     		movs	r0, r3
- 866 03f8 FFF7FEFF 		bl	fix16_cos
- 867 03fc 0200     		movs	r2, r0
- 868 03fe FB68     		ldr	r3, [r7, #12]
- 869 0400 1A60     		str	r2, [r3]
-  82:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->b = fix16_mul(q->b, multiplier);
- 870              		.loc 3 82 0
- 871 0402 BB68     		ldr	r3, [r7, #8]
- 872 0404 5B68     		ldr	r3, [r3, #4]
- 873 0406 FA69     		ldr	r2, [r7, #28]
- 874 0408 1100     		movs	r1, r2
- 875 040a 1800     		movs	r0, r3
- 876 040c FFF7FEFF 		bl	fix16_mul
- 877 0410 0200     		movs	r2, r0
- 878 0412 FB68     		ldr	r3, [r7, #12]
- 879 0414 5A60     		str	r2, [r3, #4]
-  83:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->c = fix16_mul(q->c, multiplier);
- 880              		.loc 3 83 0
- 881 0416 BB68     		ldr	r3, [r7, #8]
- 882 0418 9B68     		ldr	r3, [r3, #8]
- 883 041a FA69     		ldr	r2, [r7, #28]
- 884 041c 1100     		movs	r1, r2
- 885 041e 1800     		movs	r0, r3
- 886 0420 FFF7FEFF 		bl	fix16_mul
- 887 0424 0200     		movs	r2, r0
- 888 0426 FB68     		ldr	r3, [r7, #12]
- 889 0428 9A60     		str	r2, [r3, #8]
-  84:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->d = fix16_mul(q->d, multiplier);
- 890              		.loc 3 84 0
- 891 042a BB68     		ldr	r3, [r7, #8]
- 892 042c DB68     		ldr	r3, [r3, #12]
- 893 042e FA69     		ldr	r2, [r7, #28]
- 894 0430 1100     		movs	r1, r2
- 895 0432 1800     		movs	r0, r3
- 896 0434 FFF7FEFF 		bl	fix16_mul
- 897 0438 0200     		movs	r2, r0
- 898 043a FB68     		ldr	r3, [r7, #12]
- 899 043c DA60     		str	r2, [r3, #12]
-  85:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 900              		.loc 3 85 0
- 901 043e C046     		nop
- 902 0440 BD46     		mov	sp, r7
- 903 0442 09B0     		add	sp, sp, #36
- 904              		@ sp needed
- 905 0444 90BD     		pop	{r4, r7, pc}
- 906              		.cfi_endproc
- 907              	.LFE25:
- 909              		.align	1
- 910              		.global	qf16_avg
- 911              		.syntax unified
- 912              		.code	16
- 913              		.thumb_func
- 914              		.fpu softvfp
- 916              	qf16_avg:
- 917              	.LFB26:
-  86:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
-  87:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Weighted average
-  88:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // See http://www.acsu.buffalo.edu/~johnc/ave_sfm07.pdf
-  89:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_avg(qf16 *dest, const qf16 *q1, const qf16 *q2, fix16_t weight)
-  90:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 918              		.loc 3 90 0
- 919              		.cfi_startproc
- 920              		@ args = 0, pretend = 0, frame = 56
- 921              		@ frame_needed = 1, uses_anonymous_args = 0
- 922 0446 F0B5     		push	{r4, r5, r6, r7, lr}
- 923              		.cfi_def_cfa_offset 20
- 924              		.cfi_offset 4, -20
- 925              		.cfi_offset 5, -16
- 926              		.cfi_offset 6, -12
- 927              		.cfi_offset 7, -8
- 928              		.cfi_offset 14, -4
- 929 0448 8FB0     		sub	sp, sp, #60
- 930              		.cfi_def_cfa_offset 80
- 931 044a 00AF     		add	r7, sp, #0
- 932              		.cfi_def_cfa_register 7
- 933 044c F860     		str	r0, [r7, #12]
- 934 044e B960     		str	r1, [r7, #8]
- 935 0450 7A60     		str	r2, [r7, #4]
- 936 0452 3B60     		str	r3, [r7]
-  91:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     // z = sqrt((w1 - w2)^2 + 4 w1 w2 (q1' q2)^2
-  92:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     // <=>
-  93:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     // z = sqrt((2 w1 - 1)^2 + 4 w1 (1 - w1) (q1' q2)^2)
-  94:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     fix16_t dot = qf16_dot(q1, q2);
- 937              		.loc 3 94 0
- 938 0454 7A68     		ldr	r2, [r7, #4]
- 939 0456 BB68     		ldr	r3, [r7, #8]
- 940 0458 1100     		movs	r1, r2
- 941 045a 1800     		movs	r0, r3
- 942 045c FFF7FEFF 		bl	qf16_dot
- 943 0460 0300     		movs	r3, r0
- 944 0462 7B63     		str	r3, [r7, #52]
-  95:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     fix16_t z = fix16_sq(2 * weight - F16(1))
- 945              		.loc 3 95 0
- 946 0464 3B68     		ldr	r3, [r7]
- 947 0466 284A     		ldr	r2, .L18
- 948 0468 9446     		mov	ip, r2
- 949 046a 6344     		add	r3, r3, ip
- 950 046c 5B00     		lsls	r3, r3, #1
- 951 046e 1800     		movs	r0, r3
- 952 0470 FFF7C6FD 		bl	fix16_sq
- 953 0474 0400     		movs	r4, r0
-  96:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****             + fix16_mul(4 * weight, fix16_mul((F16(1) - weight), fix16_sq(dot)));
- 954              		.loc 3 96 0
- 955 0476 3B68     		ldr	r3, [r7]
- 956 0478 9D00     		lsls	r5, r3, #2
- 957 047a 3B68     		ldr	r3, [r7]
- 958 047c 8022     		movs	r2, #128
- 959 047e 5202     		lsls	r2, r2, #9
- 960 0480 D61A     		subs	r6, r2, r3
- 961 0482 7B6B     		ldr	r3, [r7, #52]
- 962 0484 1800     		movs	r0, r3
- 963 0486 FFF7BBFD 		bl	fix16_sq
- 964 048a 0300     		movs	r3, r0
- 965 048c 1900     		movs	r1, r3
- 966 048e 3000     		movs	r0, r6
- 967 0490 FFF7FEFF 		bl	fix16_mul
- 968 0494 0300     		movs	r3, r0
- 969 0496 1900     		movs	r1, r3
- 970 0498 2800     		movs	r0, r5
- 971 049a FFF7FEFF 		bl	fix16_mul
- 972 049e 0300     		movs	r3, r0
-  95:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     fix16_t z = fix16_sq(2 * weight - F16(1))
- 973              		.loc 3 95 0
- 974 04a0 E318     		adds	r3, r4, r3
- 975 04a2 3B63     		str	r3, [r7, #48]
-  97:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     z = fix16_sqrt(z);
- 976              		.loc 3 97 0
- 977 04a4 3B6B     		ldr	r3, [r7, #48]
- 978 04a6 1800     		movs	r0, r3
- 979 04a8 FFF7FEFF 		bl	fix16_sqrt
- 980 04ac 0300     		movs	r3, r0
- 981 04ae 3B63     		str	r3, [r7, #48]
-  98:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
-  99:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     // q = 2 * w1 * (q1' q2) q1 + (w2 - w1 + z) q2
- 100:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     // <=>
- 101:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     // q = 2 * w1 * (q1' q2) q1 + (1 - 2 * w1 + z) q2
- 102:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16 tmp1;
- 103:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_mul_s(&tmp1, q1, fix16_mul(2 * weight, dot));
- 982              		.loc 3 103 0
- 983 04b0 3B68     		ldr	r3, [r7]
- 984 04b2 5B00     		lsls	r3, r3, #1
- 985 04b4 7A6B     		ldr	r2, [r7, #52]
- 986 04b6 1100     		movs	r1, r2
- 987 04b8 1800     		movs	r0, r3
- 988 04ba FFF7FEFF 		bl	fix16_mul
- 989 04be 0200     		movs	r2, r0
- 990 04c0 B968     		ldr	r1, [r7, #8]
- 991 04c2 2024     		movs	r4, #32
- 992 04c4 3B19     		adds	r3, r7, r4
- 993 04c6 1800     		movs	r0, r3
- 994 04c8 FFF7FEFF 		bl	qf16_mul_s
- 104:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 105:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16 tmp2;
- 106:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_mul_s(&tmp2, q2, F16(1) - 2 * weight + z);
- 995              		.loc 3 106 0
- 996 04cc 3B68     		ldr	r3, [r7]
- 997 04ce 8022     		movs	r2, #128
- 998 04d0 1202     		lsls	r2, r2, #8
- 999 04d2 D31A     		subs	r3, r2, r3
- 1000 04d4 5A00     		lsls	r2, r3, #1
- 1001 04d6 3B6B     		ldr	r3, [r7, #48]
- 1002 04d8 D218     		adds	r2, r2, r3
- 1003 04da 7968     		ldr	r1, [r7, #4]
- 1004 04dc 1025     		movs	r5, #16
- 1005 04de 7B19     		adds	r3, r7, r5
- 1006 04e0 1800     		movs	r0, r3
- 1007 04e2 FFF7FEFF 		bl	qf16_mul_s
- 107:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 108:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_add(dest, &tmp1, &tmp2);
- 1008              		.loc 3 108 0
- 1009 04e6 7A19     		adds	r2, r7, r5
- 1010 04e8 3919     		adds	r1, r7, r4
- 1011 04ea FB68     		ldr	r3, [r7, #12]
- 1012 04ec 1800     		movs	r0, r3
- 1013 04ee FFF7FEFF 		bl	qf16_add
- 109:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_normalize(dest, dest);
- 1014              		.loc 3 109 0
- 1015 04f2 FA68     		ldr	r2, [r7, #12]
- 1016 04f4 FB68     		ldr	r3, [r7, #12]
- 1017 04f6 1100     		movs	r1, r2
- 1018 04f8 1800     		movs	r0, r3
- 1019 04fa FFF7FEFF 		bl	qf16_normalize
- 110:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 1020              		.loc 3 110 0
- 1021 04fe C046     		nop
- 1022 0500 BD46     		mov	sp, r7
- 1023 0502 0FB0     		add	sp, sp, #60
- 1024              		@ sp needed
- 1025 0504 F0BD     		pop	{r4, r5, r6, r7, pc}
- 1026              	.L19:
- 1027 0506 C046     		.align	2
- 1028              	.L18:
- 1029 0508 0080FFFF 		.word	-32768
- 1030              		.cfi_endproc
- 1031              	.LFE26:
- 1033              		.align	1
- 1034              		.global	qf16_from_axis_angle
- 1035              		.syntax unified
- 1036              		.code	16
- 1037              		.thumb_func
- 1038              		.fpu softvfp
- 1040              	qf16_from_axis_angle:
- 1041              	.LFB27:
- 111:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
- 112:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_from_axis_angle(qf16 *dest, const v3d *axis, fix16_t angle)
- 113:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 1042              		.loc 3 113 0
- 1043              		.cfi_startproc
- 1044              		@ args = 0, pretend = 0, frame = 24
- 1045              		@ frame_needed = 1, uses_anonymous_args = 0
- 1046 050c 80B5     		push	{r7, lr}
- 1047              		.cfi_def_cfa_offset 8
- 1048              		.cfi_offset 7, -8
- 1049              		.cfi_offset 14, -4
- 1050 050e 86B0     		sub	sp, sp, #24
- 1051              		.cfi_def_cfa_offset 32
- 1052 0510 00AF     		add	r7, sp, #0
- 1053              		.cfi_def_cfa_register 7
- 1054 0512 F860     		str	r0, [r7, #12]
- 1055 0514 B960     		str	r1, [r7, #8]
- 1056 0516 7A60     		str	r2, [r7, #4]
- 114:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     angle /= 2;
- 1057              		.loc 3 114 0
- 1058 0518 7B68     		ldr	r3, [r7, #4]
- 1059 051a 002B     		cmp	r3, #0
- 1060 051c 00DA     		bge	.L21
- 1061 051e 0133     		adds	r3, r3, #1
- 1062              	.L21:
- 1063 0520 5B10     		asrs	r3, r3, #1
- 1064 0522 7B60     		str	r3, [r7, #4]
- 115:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     fix16_t scale = fix16_sin(angle);
- 1065              		.loc 3 115 0
- 1066 0524 7B68     		ldr	r3, [r7, #4]
- 1067 0526 1800     		movs	r0, r3
- 1068 0528 FFF7FEFF 		bl	fix16_sin
- 1069 052c 0300     		movs	r3, r0
- 1070 052e 7B61     		str	r3, [r7, #20]
- 116:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 117:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->a = fix16_cos(angle);
- 1071              		.loc 3 117 0
- 1072 0530 7B68     		ldr	r3, [r7, #4]
- 1073 0532 1800     		movs	r0, r3
- 1074 0534 FFF7FEFF 		bl	fix16_cos
- 1075 0538 0200     		movs	r2, r0
- 1076 053a FB68     		ldr	r3, [r7, #12]
- 1077 053c 1A60     		str	r2, [r3]
- 118:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->b = fix16_mul(axis->x, scale);
- 1078              		.loc 3 118 0
- 1079 053e BB68     		ldr	r3, [r7, #8]
- 1080 0540 1B68     		ldr	r3, [r3]
- 1081 0542 7A69     		ldr	r2, [r7, #20]
- 1082 0544 1100     		movs	r1, r2
- 1083 0546 1800     		movs	r0, r3
- 1084 0548 FFF7FEFF 		bl	fix16_mul
- 1085 054c 0200     		movs	r2, r0
- 1086 054e FB68     		ldr	r3, [r7, #12]
- 1087 0550 5A60     		str	r2, [r3, #4]
- 119:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->c = fix16_mul(axis->y, scale);
- 1088              		.loc 3 119 0
- 1089 0552 BB68     		ldr	r3, [r7, #8]
- 1090 0554 5B68     		ldr	r3, [r3, #4]
- 1091 0556 7A69     		ldr	r2, [r7, #20]
- 1092 0558 1100     		movs	r1, r2
- 1093 055a 1800     		movs	r0, r3
- 1094 055c FFF7FEFF 		bl	fix16_mul
- 1095 0560 0200     		movs	r2, r0
- 1096 0562 FB68     		ldr	r3, [r7, #12]
- 1097 0564 9A60     		str	r2, [r3, #8]
- 120:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->d = fix16_mul(axis->z, scale);
- 1098              		.loc 3 120 0
- 1099 0566 BB68     		ldr	r3, [r7, #8]
- 1100 0568 9B68     		ldr	r3, [r3, #8]
- 1101 056a 7A69     		ldr	r2, [r7, #20]
- 1102 056c 1100     		movs	r1, r2
- 1103 056e 1800     		movs	r0, r3
- 1104 0570 FFF7FEFF 		bl	fix16_mul
- 1105 0574 0200     		movs	r2, r0
- 1106 0576 FB68     		ldr	r3, [r7, #12]
- 1107 0578 DA60     		str	r2, [r3, #12]
- 121:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 1108              		.loc 3 121 0
- 1109 057a C046     		nop
- 1110 057c BD46     		mov	sp, r7
- 1111 057e 06B0     		add	sp, sp, #24
- 1112              		@ sp needed
- 1113 0580 80BD     		pop	{r7, pc}
- 1114              		.cfi_endproc
- 1115              	.LFE27:
- 1117              		.align	1
- 1118              		.global	qf16_to_matrix
- 1119              		.syntax unified
- 1120              		.code	16
- 1121              		.thumb_func
- 1122              		.fpu softvfp
- 1124              	qf16_to_matrix:
- 1125              	.LFB28:
- 122:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
- 123:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** // Unit quaternion to rotation matrix
- 124:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_to_matrix(mf16 *dest, const qf16 *q)
- 125:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 1126              		.loc 3 125 0
- 1127              		.cfi_startproc
- 1128              		@ args = 0, pretend = 0, frame = 8
- 1129              		@ frame_needed = 1, uses_anonymous_args = 0
- 1130 0582 B0B5     		push	{r4, r5, r7, lr}
- 1131              		.cfi_def_cfa_offset 16
- 1132              		.cfi_offset 4, -16
- 1133              		.cfi_offset 5, -12
- 1134              		.cfi_offset 7, -8
- 1135              		.cfi_offset 14, -4
- 1136 0584 82B0     		sub	sp, sp, #8
- 1137              		.cfi_def_cfa_offset 24
- 1138 0586 00AF     		add	r7, sp, #0
- 1139              		.cfi_def_cfa_register 7
- 1140 0588 7860     		str	r0, [r7, #4]
- 1141 058a 3960     		str	r1, [r7]
- 126:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->rows = dest->columns = 3;
- 1142              		.loc 3 126 0
- 1143 058c 7B68     		ldr	r3, [r7, #4]
- 1144 058e 0322     		movs	r2, #3
- 1145 0590 5A70     		strb	r2, [r3, #1]
- 1146 0592 7B68     		ldr	r3, [r7, #4]
- 1147 0594 5A78     		ldrb	r2, [r3, #1]
- 1148 0596 7B68     		ldr	r3, [r7, #4]
- 1149 0598 1A70     		strb	r2, [r3]
- 127:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->errors = 0;
- 1150              		.loc 3 127 0
- 1151 059a 7B68     		ldr	r3, [r7, #4]
- 1152 059c 0022     		movs	r2, #0
- 1153 059e 9A70     		strb	r2, [r3, #2]
- 128:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[0][0] = fix16_one - 2 * (fix16_sq(q->c) + fix16_sq(q->d));
- 1154              		.loc 3 128 0
- 1155 05a0 8023     		movs	r3, #128
- 1156 05a2 5C02     		lsls	r4, r3, #9
- 1157 05a4 3B68     		ldr	r3, [r7]
- 1158 05a6 9B68     		ldr	r3, [r3, #8]
- 1159 05a8 1800     		movs	r0, r3
- 1160 05aa FFF729FD 		bl	fix16_sq
- 1161 05ae 0500     		movs	r5, r0
- 1162 05b0 3B68     		ldr	r3, [r7]
- 1163 05b2 DB68     		ldr	r3, [r3, #12]
- 1164 05b4 1800     		movs	r0, r3
- 1165 05b6 FFF723FD 		bl	fix16_sq
- 1166 05ba 0300     		movs	r3, r0
- 1167 05bc EB18     		adds	r3, r5, r3
- 1168 05be 5B00     		lsls	r3, r3, #1
- 1169 05c0 E21A     		subs	r2, r4, r3
- 1170 05c2 7B68     		ldr	r3, [r7, #4]
- 1171 05c4 5A60     		str	r2, [r3, #4]
- 129:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[1][1] = fix16_one - 2 * (fix16_sq(q->b) + fix16_sq(q->d));
- 1172              		.loc 3 129 0
- 1173 05c6 8023     		movs	r3, #128
- 1174 05c8 5C02     		lsls	r4, r3, #9
- 1175 05ca 3B68     		ldr	r3, [r7]
- 1176 05cc 5B68     		ldr	r3, [r3, #4]
- 1177 05ce 1800     		movs	r0, r3
- 1178 05d0 FFF716FD 		bl	fix16_sq
- 1179 05d4 0500     		movs	r5, r0
- 1180 05d6 3B68     		ldr	r3, [r7]
- 1181 05d8 DB68     		ldr	r3, [r3, #12]
- 1182 05da 1800     		movs	r0, r3
- 1183 05dc FFF710FD 		bl	fix16_sq
- 1184 05e0 0300     		movs	r3, r0
- 1185 05e2 EB18     		adds	r3, r5, r3
- 1186 05e4 5B00     		lsls	r3, r3, #1
- 1187 05e6 E21A     		subs	r2, r4, r3
- 1188 05e8 7B68     		ldr	r3, [r7, #4]
- 1189 05ea 9A62     		str	r2, [r3, #40]
- 130:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[2][2] = fix16_one - 2 * (fix16_sq(q->b) + fix16_sq(q->c));
- 1190              		.loc 3 130 0
- 1191 05ec 8023     		movs	r3, #128
- 1192 05ee 5C02     		lsls	r4, r3, #9
- 1193 05f0 3B68     		ldr	r3, [r7]
- 1194 05f2 5B68     		ldr	r3, [r3, #4]
- 1195 05f4 1800     		movs	r0, r3
- 1196 05f6 FFF703FD 		bl	fix16_sq
- 1197 05fa 0500     		movs	r5, r0
- 1198 05fc 3B68     		ldr	r3, [r7]
- 1199 05fe 9B68     		ldr	r3, [r3, #8]
- 1200 0600 1800     		movs	r0, r3
- 1201 0602 FFF7FDFC 		bl	fix16_sq
- 1202 0606 0300     		movs	r3, r0
- 1203 0608 EB18     		adds	r3, r5, r3
- 1204 060a 5B00     		lsls	r3, r3, #1
- 1205 060c E21A     		subs	r2, r4, r3
- 1206 060e 7B68     		ldr	r3, [r7, #4]
- 1207 0610 DA64     		str	r2, [r3, #76]
- 131:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 132:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[1][0] = 2 * (fix16_mul(q->b, q->c) + fix16_mul(q->a, q->d));
- 1208              		.loc 3 132 0
- 1209 0612 3B68     		ldr	r3, [r7]
- 1210 0614 5A68     		ldr	r2, [r3, #4]
- 1211 0616 3B68     		ldr	r3, [r7]
- 1212 0618 9B68     		ldr	r3, [r3, #8]
- 1213 061a 1900     		movs	r1, r3
- 1214 061c 1000     		movs	r0, r2
- 1215 061e FFF7FEFF 		bl	fix16_mul
- 1216 0622 0400     		movs	r4, r0
- 1217 0624 3B68     		ldr	r3, [r7]
- 1218 0626 1A68     		ldr	r2, [r3]
- 1219 0628 3B68     		ldr	r3, [r7]
- 1220 062a DB68     		ldr	r3, [r3, #12]
- 1221 062c 1900     		movs	r1, r3
- 1222 062e 1000     		movs	r0, r2
- 1223 0630 FFF7FEFF 		bl	fix16_mul
- 1224 0634 0300     		movs	r3, r0
- 1225 0636 E318     		adds	r3, r4, r3
- 1226 0638 5A00     		lsls	r2, r3, #1
- 1227 063a 7B68     		ldr	r3, [r7, #4]
- 1228 063c 5A62     		str	r2, [r3, #36]
- 133:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[0][1] = 2 * (fix16_mul(q->b, q->c) - fix16_mul(q->a, q->d));
- 1229              		.loc 3 133 0
- 1230 063e 3B68     		ldr	r3, [r7]
- 1231 0640 5A68     		ldr	r2, [r3, #4]
- 1232 0642 3B68     		ldr	r3, [r7]
- 1233 0644 9B68     		ldr	r3, [r3, #8]
- 1234 0646 1900     		movs	r1, r3
- 1235 0648 1000     		movs	r0, r2
- 1236 064a FFF7FEFF 		bl	fix16_mul
- 1237 064e 0400     		movs	r4, r0
- 1238 0650 3B68     		ldr	r3, [r7]
- 1239 0652 1A68     		ldr	r2, [r3]
- 1240 0654 3B68     		ldr	r3, [r7]
- 1241 0656 DB68     		ldr	r3, [r3, #12]
- 1242 0658 1900     		movs	r1, r3
- 1243 065a 1000     		movs	r0, r2
- 1244 065c FFF7FEFF 		bl	fix16_mul
- 1245 0660 0300     		movs	r3, r0
- 1246 0662 E31A     		subs	r3, r4, r3
- 1247 0664 5A00     		lsls	r2, r3, #1
- 1248 0666 7B68     		ldr	r3, [r7, #4]
- 1249 0668 9A60     		str	r2, [r3, #8]
- 134:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 135:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[2][0] = 2 * (fix16_mul(q->b, q->d) - fix16_mul(q->a, q->c));
- 1250              		.loc 3 135 0
- 1251 066a 3B68     		ldr	r3, [r7]
- 1252 066c 5A68     		ldr	r2, [r3, #4]
- 1253 066e 3B68     		ldr	r3, [r7]
- 1254 0670 DB68     		ldr	r3, [r3, #12]
- 1255 0672 1900     		movs	r1, r3
- 1256 0674 1000     		movs	r0, r2
- 1257 0676 FFF7FEFF 		bl	fix16_mul
- 1258 067a 0400     		movs	r4, r0
- 1259 067c 3B68     		ldr	r3, [r7]
- 1260 067e 1A68     		ldr	r2, [r3]
- 1261 0680 3B68     		ldr	r3, [r7]
- 1262 0682 9B68     		ldr	r3, [r3, #8]
- 1263 0684 1900     		movs	r1, r3
- 1264 0686 1000     		movs	r0, r2
- 1265 0688 FFF7FEFF 		bl	fix16_mul
- 1266 068c 0300     		movs	r3, r0
- 1267 068e E31A     		subs	r3, r4, r3
- 1268 0690 5A00     		lsls	r2, r3, #1
- 1269 0692 7B68     		ldr	r3, [r7, #4]
- 1270 0694 5A64     		str	r2, [r3, #68]
- 136:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[0][2] = 2 * (fix16_mul(q->b, q->d) + fix16_mul(q->a, q->c));
- 1271              		.loc 3 136 0
- 1272 0696 3B68     		ldr	r3, [r7]
- 1273 0698 5A68     		ldr	r2, [r3, #4]
- 1274 069a 3B68     		ldr	r3, [r7]
- 1275 069c DB68     		ldr	r3, [r3, #12]
- 1276 069e 1900     		movs	r1, r3
- 1277 06a0 1000     		movs	r0, r2
- 1278 06a2 FFF7FEFF 		bl	fix16_mul
- 1279 06a6 0400     		movs	r4, r0
- 1280 06a8 3B68     		ldr	r3, [r7]
- 1281 06aa 1A68     		ldr	r2, [r3]
- 1282 06ac 3B68     		ldr	r3, [r7]
- 1283 06ae 9B68     		ldr	r3, [r3, #8]
- 1284 06b0 1900     		movs	r1, r3
- 1285 06b2 1000     		movs	r0, r2
- 1286 06b4 FFF7FEFF 		bl	fix16_mul
- 1287 06b8 0300     		movs	r3, r0
- 1288 06ba E318     		adds	r3, r4, r3
- 1289 06bc 5A00     		lsls	r2, r3, #1
- 1290 06be 7B68     		ldr	r3, [r7, #4]
- 1291 06c0 DA60     		str	r2, [r3, #12]
- 137:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 138:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[2][1] = 2 * (fix16_mul(q->c, q->d) + fix16_mul(q->a, q->b));
- 1292              		.loc 3 138 0
- 1293 06c2 3B68     		ldr	r3, [r7]
- 1294 06c4 9A68     		ldr	r2, [r3, #8]
- 1295 06c6 3B68     		ldr	r3, [r7]
- 1296 06c8 DB68     		ldr	r3, [r3, #12]
- 1297 06ca 1900     		movs	r1, r3
- 1298 06cc 1000     		movs	r0, r2
- 1299 06ce FFF7FEFF 		bl	fix16_mul
- 1300 06d2 0400     		movs	r4, r0
- 1301 06d4 3B68     		ldr	r3, [r7]
- 1302 06d6 1A68     		ldr	r2, [r3]
- 1303 06d8 3B68     		ldr	r3, [r7]
- 1304 06da 5B68     		ldr	r3, [r3, #4]
- 1305 06dc 1900     		movs	r1, r3
- 1306 06de 1000     		movs	r0, r2
- 1307 06e0 FFF7FEFF 		bl	fix16_mul
- 1308 06e4 0300     		movs	r3, r0
- 1309 06e6 E318     		adds	r3, r4, r3
- 1310 06e8 5A00     		lsls	r2, r3, #1
- 1311 06ea 7B68     		ldr	r3, [r7, #4]
- 1312 06ec 9A64     		str	r2, [r3, #72]
- 139:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     dest->data[1][2] = 2 * (fix16_mul(q->c, q->d) - fix16_mul(q->a, q->b));
- 1313              		.loc 3 139 0
- 1314 06ee 3B68     		ldr	r3, [r7]
- 1315 06f0 9A68     		ldr	r2, [r3, #8]
- 1316 06f2 3B68     		ldr	r3, [r7]
- 1317 06f4 DB68     		ldr	r3, [r3, #12]
- 1318 06f6 1900     		movs	r1, r3
- 1319 06f8 1000     		movs	r0, r2
- 1320 06fa FFF7FEFF 		bl	fix16_mul
- 1321 06fe 0400     		movs	r4, r0
- 1322 0700 3B68     		ldr	r3, [r7]
- 1323 0702 1A68     		ldr	r2, [r3]
- 1324 0704 3B68     		ldr	r3, [r7]
- 1325 0706 5B68     		ldr	r3, [r3, #4]
- 1326 0708 1900     		movs	r1, r3
- 1327 070a 1000     		movs	r0, r2
- 1328 070c FFF7FEFF 		bl	fix16_mul
- 1329 0710 0300     		movs	r3, r0
- 1330 0712 E31A     		subs	r3, r4, r3
- 1331 0714 5A00     		lsls	r2, r3, #1
- 1332 0716 7B68     		ldr	r3, [r7, #4]
- 1333 0718 DA62     		str	r2, [r3, #44]
- 140:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 1334              		.loc 3 140 0
- 1335 071a C046     		nop
- 1336 071c BD46     		mov	sp, r7
- 1337 071e 02B0     		add	sp, sp, #8
- 1338              		@ sp needed
- 1339 0720 B0BD     		pop	{r4, r5, r7, pc}
- 1340              		.cfi_endproc
- 1341              	.LFE28:
- 1343              		.align	1
- 1344              		.global	qf16_rotate
- 1345              		.syntax unified
- 1346              		.code	16
- 1347              		.thumb_func
- 1348              		.fpu softvfp
- 1350              	qf16_rotate:
- 1351              	.LFB29:
- 141:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** 
- 142:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** void qf16_rotate(v3d *dest, const qf16 *q, const v3d *v)
- 143:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** {
- 1352              		.loc 3 143 0
- 1353              		.cfi_startproc
- 1354              		@ args = 0, pretend = 0, frame = 48
- 1355              		@ frame_needed = 1, uses_anonymous_args = 0
- 1356 0722 B0B5     		push	{r4, r5, r7, lr}
- 1357              		.cfi_def_cfa_offset 16
- 1358              		.cfi_offset 4, -16
- 1359              		.cfi_offset 5, -12
- 1360              		.cfi_offset 7, -8
- 1361              		.cfi_offset 14, -4
- 1362 0724 8CB0     		sub	sp, sp, #48
- 1363              		.cfi_def_cfa_offset 64
- 1364 0726 00AF     		add	r7, sp, #0
- 1365              		.cfi_def_cfa_register 7
- 1366 0728 F860     		str	r0, [r7, #12]
- 1367 072a B960     		str	r1, [r7, #8]
- 1368 072c 7A60     		str	r2, [r7, #4]
- 144:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16 vector, q_conj;
- 145:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 146:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_from_v3d(&vector, v, 0);
- 1369              		.loc 3 146 0
- 1370 072e 7968     		ldr	r1, [r7, #4]
- 1371 0730 2024     		movs	r4, #32
- 1372 0732 3B19     		adds	r3, r7, r4
- 1373 0734 0022     		movs	r2, #0
- 1374 0736 1800     		movs	r0, r3
- 1375 0738 FFF771FC 		bl	qf16_from_v3d
- 147:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_conj(&q_conj, q);
- 1376              		.loc 3 147 0
- 1377 073c BA68     		ldr	r2, [r7, #8]
- 1378 073e 1025     		movs	r5, #16
- 1379 0740 7B19     		adds	r3, r7, r5
- 1380 0742 1100     		movs	r1, r2
- 1381 0744 1800     		movs	r0, r3
- 1382 0746 FFF7FEFF 		bl	qf16_conj
- 148:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 149:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_mul(&vector, q, &vector);
- 1383              		.loc 3 149 0
- 1384 074a 3A19     		adds	r2, r7, r4
- 1385 074c B968     		ldr	r1, [r7, #8]
- 1386 074e 3B19     		adds	r3, r7, r4
- 1387 0750 1800     		movs	r0, r3
- 1388 0752 FFF7FEFF 		bl	qf16_mul
- 150:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_mul(&vector, &vector, &q_conj);
- 1389              		.loc 3 150 0
- 1390 0756 7A19     		adds	r2, r7, r5
- 1391 0758 3919     		adds	r1, r7, r4
- 1392 075a 3B19     		adds	r3, r7, r4
- 1393 075c 1800     		movs	r0, r3
- 1394 075e FFF7FEFF 		bl	qf16_mul
- 151:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     
- 152:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c ****     qf16_to_v3d(dest, &vector);
- 1395              		.loc 3 152 0
- 1396 0762 3A19     		adds	r2, r7, r4
- 1397 0764 FB68     		ldr	r3, [r7, #12]
- 1398 0766 1100     		movs	r1, r2
- 1399 0768 1800     		movs	r0, r3
- 1400 076a FFF771FC 		bl	qf16_to_v3d
- 153:/Users/legge/Development/moppen-game/shared/libfixmatrix/fixquat.c **** }
- 1401              		.loc 3 153 0
- 1402 076e C046     		nop
- 1403 0770 BD46     		mov	sp, r7
- 1404 0772 0CB0     		add	sp, sp, #48
- 1405              		@ sp needed
- 1406 0774 B0BD     		pop	{r4, r5, r7, pc}
- 1407              		.cfi_endproc
- 1408              	.LFE29:
- 1410              	.Letext0:
- 1411              		.file 4 "/Applications/codelite.app/Contents/SharedSupport/tools/gcc-arm-custom/arm-none-eabi/incl
- 1412              		.file 5 "/Applications/codelite.app/Contents/SharedSupport/tools/gcc-arm-custom/arm-none-eabi/incl
- 1413              		.file 6 "/Users/legge/Development/moppen-game/shared/libfixmatrix/fixmatrix.h"
- 1414              		.file 7 "/Users/legge/Development/moppen-game/shared/libfixmatrix/fixvector3d.h"
+  83              		.global	fix16_add
+  84              		.syntax unified
+  85              		.code	16
+  86              		.thumb_func
+  87              		.fpu softvfp
+  89              	fix16_add:
+  90              	.LFB32:
+  91              		.file 1 "/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c"
+   1:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #include "fix16.h"
+   2:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #include "int64.h"
+   3:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #include "../libdivide/libdivide.h"
+   4:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+   5:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* Subtraction and addition with overflow detection.
+   6:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * The versions without overflow detection are inlined in the header.
+   7:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  */
+   8:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #ifndef FIXMATH_NO_OVERFLOW
+   9:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_add(fix16_t a, fix16_t b)
+  10:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+  92              		.loc 1 10 0
+  93              		.cfi_startproc
+  94              		@ args = 0, pretend = 0, frame = 24
+  95              		@ frame_needed = 1, uses_anonymous_args = 0
+  96 0000 80B5     		push	{r7, lr}
+  97              		.cfi_def_cfa_offset 8
+  98              		.cfi_offset 7, -8
+  99              		.cfi_offset 14, -4
+ 100 0002 86B0     		sub	sp, sp, #24
+ 101              		.cfi_def_cfa_offset 32
+ 102 0004 00AF     		add	r7, sp, #0
+ 103              		.cfi_def_cfa_register 7
+ 104 0006 7860     		str	r0, [r7, #4]
+ 105 0008 3960     		str	r1, [r7]
+  11:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Use unsigned integers because overflow with signed integers is
+  12:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// an undefined operation (http://www.airs.com/blog/archives/120).
+  13:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t _a = a, _b = b;
+ 106              		.loc 1 13 0
+ 107 000a 7B68     		ldr	r3, [r7, #4]
+ 108 000c 7B61     		str	r3, [r7, #20]
+ 109 000e 3B68     		ldr	r3, [r7]
+ 110 0010 3B61     		str	r3, [r7, #16]
+  14:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t sum = _a + _b;
+ 111              		.loc 1 14 0
+ 112 0012 7A69     		ldr	r2, [r7, #20]
+ 113 0014 3B69     		ldr	r3, [r7, #16]
+ 114 0016 D318     		adds	r3, r2, r3
+ 115 0018 FB60     		str	r3, [r7, #12]
+  15:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  16:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Overflow can only happen if sign of a == sign of b, and then
+  17:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// it causes sign of sum != sign of a.
+  18:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (!((_a ^ _b) & 0x80000000) && ((_a ^ sum) & 0x80000000))
+ 116              		.loc 1 18 0
+ 117 001a 7A69     		ldr	r2, [r7, #20]
+ 118 001c 3B69     		ldr	r3, [r7, #16]
+ 119 001e 5340     		eors	r3, r2
+ 120 0020 06D4     		bmi	.L2
+ 121              		.loc 1 18 0 is_stmt 0 discriminator 1
+ 122 0022 7A69     		ldr	r2, [r7, #20]
+ 123 0024 FB68     		ldr	r3, [r7, #12]
+ 124 0026 5340     		eors	r3, r2
+ 125 0028 02D5     		bpl	.L2
+  19:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		return fix16_overflow;
+ 126              		.loc 1 19 0 is_stmt 1
+ 127 002a 8023     		movs	r3, #128
+ 128 002c 1B06     		lsls	r3, r3, #24
+ 129 002e 00E0     		b	.L3
+ 130              	.L2:
+  20:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+  21:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return sum;
+ 131              		.loc 1 21 0
+ 132 0030 FB68     		ldr	r3, [r7, #12]
+ 133              	.L3:
+  22:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 134              		.loc 1 22 0
+ 135 0032 1800     		movs	r0, r3
+ 136 0034 BD46     		mov	sp, r7
+ 137 0036 06B0     		add	sp, sp, #24
+ 138              		@ sp needed
+ 139 0038 80BD     		pop	{r7, pc}
+ 140              		.cfi_endproc
+ 141              	.LFE32:
+ 143              		.align	1
+ 144              		.global	fix16_sub
+ 145              		.syntax unified
+ 146              		.code	16
+ 147              		.thumb_func
+ 148              		.fpu softvfp
+ 150              	fix16_sub:
+ 151              	.LFB33:
+  23:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  24:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_sub(fix16_t a, fix16_t b)
+  25:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 152              		.loc 1 25 0
+ 153              		.cfi_startproc
+ 154              		@ args = 0, pretend = 0, frame = 24
+ 155              		@ frame_needed = 1, uses_anonymous_args = 0
+ 156 003a 80B5     		push	{r7, lr}
+ 157              		.cfi_def_cfa_offset 8
+ 158              		.cfi_offset 7, -8
+ 159              		.cfi_offset 14, -4
+ 160 003c 86B0     		sub	sp, sp, #24
+ 161              		.cfi_def_cfa_offset 32
+ 162 003e 00AF     		add	r7, sp, #0
+ 163              		.cfi_def_cfa_register 7
+ 164 0040 7860     		str	r0, [r7, #4]
+ 165 0042 3960     		str	r1, [r7]
+  26:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t _a = a, _b = b;
+ 166              		.loc 1 26 0
+ 167 0044 7B68     		ldr	r3, [r7, #4]
+ 168 0046 7B61     		str	r3, [r7, #20]
+ 169 0048 3B68     		ldr	r3, [r7]
+ 170 004a 3B61     		str	r3, [r7, #16]
+  27:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t diff = _a - _b;
+ 171              		.loc 1 27 0
+ 172 004c 7A69     		ldr	r2, [r7, #20]
+ 173 004e 3B69     		ldr	r3, [r7, #16]
+ 174 0050 D31A     		subs	r3, r2, r3
+ 175 0052 FB60     		str	r3, [r7, #12]
+  28:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  29:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Overflow can only happen if sign of a != sign of b, and then
+  30:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// it causes sign of diff != sign of a.
+  31:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (((_a ^ _b) & 0x80000000) && ((_a ^ diff) & 0x80000000))
+ 176              		.loc 1 31 0
+ 177 0054 7A69     		ldr	r2, [r7, #20]
+ 178 0056 3B69     		ldr	r3, [r7, #16]
+ 179 0058 5340     		eors	r3, r2
+ 180 005a 06D5     		bpl	.L5
+ 181              		.loc 1 31 0 is_stmt 0 discriminator 1
+ 182 005c 7A69     		ldr	r2, [r7, #20]
+ 183 005e FB68     		ldr	r3, [r7, #12]
+ 184 0060 5340     		eors	r3, r2
+ 185 0062 02D5     		bpl	.L5
+  32:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		return fix16_overflow;
+ 186              		.loc 1 32 0 is_stmt 1
+ 187 0064 8023     		movs	r3, #128
+ 188 0066 1B06     		lsls	r3, r3, #24
+ 189 0068 00E0     		b	.L6
+ 190              	.L5:
+  33:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+  34:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return diff;
+ 191              		.loc 1 34 0
+ 192 006a FB68     		ldr	r3, [r7, #12]
+ 193              	.L6:
+  35:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 194              		.loc 1 35 0
+ 195 006c 1800     		movs	r0, r3
+ 196 006e BD46     		mov	sp, r7
+ 197 0070 06B0     		add	sp, sp, #24
+ 198              		@ sp needed
+ 199 0072 80BD     		pop	{r7, pc}
+ 200              		.cfi_endproc
+ 201              	.LFE33:
+ 203              		.align	1
+ 204              		.global	fix16_sadd
+ 205              		.syntax unified
+ 206              		.code	16
+ 207              		.thumb_func
+ 208              		.fpu softvfp
+ 210              	fix16_sadd:
+ 211              	.LFB34:
+  36:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  37:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* Saturating arithmetic */
+  38:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_sadd(fix16_t a, fix16_t b)
+  39:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 212              		.loc 1 39 0
+ 213              		.cfi_startproc
+ 214              		@ args = 0, pretend = 0, frame = 16
+ 215              		@ frame_needed = 1, uses_anonymous_args = 0
+ 216 0074 80B5     		push	{r7, lr}
+ 217              		.cfi_def_cfa_offset 8
+ 218              		.cfi_offset 7, -8
+ 219              		.cfi_offset 14, -4
+ 220 0076 84B0     		sub	sp, sp, #16
+ 221              		.cfi_def_cfa_offset 24
+ 222 0078 00AF     		add	r7, sp, #0
+ 223              		.cfi_def_cfa_register 7
+ 224 007a 7860     		str	r0, [r7, #4]
+ 225 007c 3960     		str	r1, [r7]
+  40:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = fix16_add(a, b);
+ 226              		.loc 1 40 0
+ 227 007e 3A68     		ldr	r2, [r7]
+ 228 0080 7B68     		ldr	r3, [r7, #4]
+ 229 0082 1100     		movs	r1, r2
+ 230 0084 1800     		movs	r0, r3
+ 231 0086 FFF7FEFF 		bl	fix16_add
+ 232 008a 0300     		movs	r3, r0
+ 233 008c FB60     		str	r3, [r7, #12]
+  41:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  42:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (result == fix16_overflow)
+ 234              		.loc 1 42 0
+ 235 008e 8023     		movs	r3, #128
+ 236 0090 1B06     		lsls	r3, r3, #24
+ 237 0092 FA68     		ldr	r2, [r7, #12]
+ 238 0094 9A42     		cmp	r2, r3
+ 239 0096 07D1     		bne	.L8
+  43:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		return (a >= 0) ? fix16_maximum : fix16_minimum;
+ 240              		.loc 1 43 0
+ 241 0098 7B68     		ldr	r3, [r7, #4]
+ 242 009a 002B     		cmp	r3, #0
+ 243 009c 01DB     		blt	.L9
+ 244              		.loc 1 43 0 is_stmt 0 discriminator 1
+ 245 009e 054B     		ldr	r3, .L12
+ 246 00a0 03E0     		b	.L11
+ 247              	.L9:
+ 248              		.loc 1 43 0 discriminator 2
+ 249 00a2 8023     		movs	r3, #128
+ 250 00a4 1B06     		lsls	r3, r3, #24
+ 251 00a6 00E0     		b	.L11
+ 252              	.L8:
+  44:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  45:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 253              		.loc 1 45 0 is_stmt 1
+ 254 00a8 FB68     		ldr	r3, [r7, #12]
+ 255              	.L11:
+  46:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }	
+ 256              		.loc 1 46 0
+ 257 00aa 1800     		movs	r0, r3
+ 258 00ac BD46     		mov	sp, r7
+ 259 00ae 04B0     		add	sp, sp, #16
+ 260              		@ sp needed
+ 261 00b0 80BD     		pop	{r7, pc}
+ 262              	.L13:
+ 263 00b2 C046     		.align	2
+ 264              	.L12:
+ 265 00b4 FFFFFF7F 		.word	2147483647
+ 266              		.cfi_endproc
+ 267              	.LFE34:
+ 269              		.align	1
+ 270              		.global	fix16_ssub
+ 271              		.syntax unified
+ 272              		.code	16
+ 273              		.thumb_func
+ 274              		.fpu softvfp
+ 276              	fix16_ssub:
+ 277              	.LFB35:
+  47:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  48:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_ssub(fix16_t a, fix16_t b)
+  49:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 278              		.loc 1 49 0
+ 279              		.cfi_startproc
+ 280              		@ args = 0, pretend = 0, frame = 16
+ 281              		@ frame_needed = 1, uses_anonymous_args = 0
+ 282 00b8 80B5     		push	{r7, lr}
+ 283              		.cfi_def_cfa_offset 8
+ 284              		.cfi_offset 7, -8
+ 285              		.cfi_offset 14, -4
+ 286 00ba 84B0     		sub	sp, sp, #16
+ 287              		.cfi_def_cfa_offset 24
+ 288 00bc 00AF     		add	r7, sp, #0
+ 289              		.cfi_def_cfa_register 7
+ 290 00be 7860     		str	r0, [r7, #4]
+ 291 00c0 3960     		str	r1, [r7]
+  50:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = fix16_sub(a, b);
+ 292              		.loc 1 50 0
+ 293 00c2 3A68     		ldr	r2, [r7]
+ 294 00c4 7B68     		ldr	r3, [r7, #4]
+ 295 00c6 1100     		movs	r1, r2
+ 296 00c8 1800     		movs	r0, r3
+ 297 00ca FFF7FEFF 		bl	fix16_sub
+ 298 00ce 0300     		movs	r3, r0
+ 299 00d0 FB60     		str	r3, [r7, #12]
+  51:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  52:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (result == fix16_overflow)
+ 300              		.loc 1 52 0
+ 301 00d2 8023     		movs	r3, #128
+ 302 00d4 1B06     		lsls	r3, r3, #24
+ 303 00d6 FA68     		ldr	r2, [r7, #12]
+ 304 00d8 9A42     		cmp	r2, r3
+ 305 00da 07D1     		bne	.L15
+  53:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		return (a >= 0) ? fix16_maximum : fix16_minimum;
+ 306              		.loc 1 53 0
+ 307 00dc 7B68     		ldr	r3, [r7, #4]
+ 308 00de 002B     		cmp	r3, #0
+ 309 00e0 01DB     		blt	.L16
+ 310              		.loc 1 53 0 is_stmt 0 discriminator 1
+ 311 00e2 054B     		ldr	r3, .L19
+ 312 00e4 03E0     		b	.L18
+ 313              	.L16:
+ 314              		.loc 1 53 0 discriminator 2
+ 315 00e6 8023     		movs	r3, #128
+ 316 00e8 1B06     		lsls	r3, r3, #24
+ 317 00ea 00E0     		b	.L18
+ 318              	.L15:
+  54:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  55:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 319              		.loc 1 55 0 is_stmt 1
+ 320 00ec FB68     		ldr	r3, [r7, #12]
+ 321              	.L18:
+  56:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 322              		.loc 1 56 0
+ 323 00ee 1800     		movs	r0, r3
+ 324 00f0 BD46     		mov	sp, r7
+ 325 00f2 04B0     		add	sp, sp, #16
+ 326              		@ sp needed
+ 327 00f4 80BD     		pop	{r7, pc}
+ 328              	.L20:
+ 329 00f6 C046     		.align	2
+ 330              	.L19:
+ 331 00f8 FFFFFF7F 		.word	2147483647
+ 332              		.cfi_endproc
+ 333              	.LFE35:
+ 335              		.align	1
+ 336              		.global	fix16_mul
+ 337              		.syntax unified
+ 338              		.code	16
+ 339              		.thumb_func
+ 340              		.fpu softvfp
+ 342              	fix16_mul:
+ 343              	.LFB36:
+  57:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+  58:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  59:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  60:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+  61:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* 64-bit implementation for fix16_mul. Fastest version for e.g. ARM Cortex M3.
+  62:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * Performs a 32*32 -> 64bit multiplication. The middle 32 bits are the result,
+  63:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * bottom 16 bits are used for rounding, and upper 16 bits are used for overflow
+  64:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * detection.
+  65:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  */
+  66:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  
+  67:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #if !defined(FIXMATH_NO_64BIT) && !defined(FIXMATH_OPTIMIZE_8BIT)
+  68:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_mul(fix16_t inArg0, fix16_t inArg1)
+  69:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+  70:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	int64_t product = (int64_t)inArg0 * inArg1;
+  71:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+  72:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_OVERFLOW
+  73:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// The upper 17 bits should all be the same (the sign).
+  74:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t upper = (product >> 47);
+  75:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+  76:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+  77:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (product < 0)
+  78:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+  79:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#ifndef FIXMATH_NO_OVERFLOW
+  80:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if (~upper)
+  81:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				return fix16_overflow;
+  82:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#endif
+  83:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		
+  84:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#ifndef FIXMATH_NO_ROUNDING
+  85:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		// This adjustment is required in order to round -1/2 correctly
+  86:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		product--;
+  87:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#endif
+  88:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+  89:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	else
+  90:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+  91:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#ifndef FIXMATH_NO_OVERFLOW
+  92:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if (upper)
+  93:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				return fix16_overflow;
+  94:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#endif
+  95:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+  96:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+  97:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifdef FIXMATH_NO_ROUNDING
+  98:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return product >> 16;
+  99:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#else
+ 100:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = product >> 16;
+ 101:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	result += (product & 0x8000) >> 15;
+ 102:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 103:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 104:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 105:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 106:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 107:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 108:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* 32-bit implementation of fix16_mul. Potentially fast on 16-bit processors,
+ 109:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * and this is a relatively good compromise for compilers that do not support
+ 110:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * uint64_t. Uses 16*16->32bit multiplications.
+ 111:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  */
+ 112:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #if defined(FIXMATH_NO_64BIT) && !defined(FIXMATH_OPTIMIZE_8BIT)
+ 113:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_mul(fix16_t inArg0, fix16_t inArg1)
+ 114:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 344              		.loc 1 114 0
+ 345              		.cfi_startproc
+ 346              		@ args = 0, pretend = 0, frame = 56
+ 347              		@ frame_needed = 1, uses_anonymous_args = 0
+ 348 00fc 80B5     		push	{r7, lr}
+ 349              		.cfi_def_cfa_offset 8
+ 350              		.cfi_offset 7, -8
+ 351              		.cfi_offset 14, -4
+ 352 00fe 8EB0     		sub	sp, sp, #56
+ 353              		.cfi_def_cfa_offset 64
+ 354 0100 00AF     		add	r7, sp, #0
+ 355              		.cfi_def_cfa_register 7
+ 356 0102 7860     		str	r0, [r7, #4]
+ 357 0104 3960     		str	r1, [r7]
+ 115:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Each argument is divided to 16-bit parts.
+ 116:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	//					AB
+ 117:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	//			*	 CD
+ 118:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// -----------
+ 119:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	//					BD	16 * 16 -> 32 bit products
+ 120:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	//				 CB
+ 121:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	//				 AD
+ 122:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	//				AC
+ 123:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	//			 |----| 64 bit product
+ 124:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	int32_t A = (inArg0 >> 16), C = (inArg1 >> 16);
+ 358              		.loc 1 124 0
+ 359 0106 7B68     		ldr	r3, [r7, #4]
+ 360 0108 1B14     		asrs	r3, r3, #16
+ 361 010a 3B63     		str	r3, [r7, #48]
+ 362 010c 3B68     		ldr	r3, [r7]
+ 363 010e 1B14     		asrs	r3, r3, #16
+ 364 0110 FB62     		str	r3, [r7, #44]
+ 125:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t B = (inArg0 & 0xFFFF), D = (inArg1 & 0xFFFF);
+ 365              		.loc 1 125 0
+ 366 0112 7B68     		ldr	r3, [r7, #4]
+ 367 0114 1B04     		lsls	r3, r3, #16
+ 368 0116 1B0C     		lsrs	r3, r3, #16
+ 369 0118 BB62     		str	r3, [r7, #40]
+ 370 011a 3B68     		ldr	r3, [r7]
+ 371 011c 1B04     		lsls	r3, r3, #16
+ 372 011e 1B0C     		lsrs	r3, r3, #16
+ 373 0120 7B62     		str	r3, [r7, #36]
+ 126:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 127:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	int32_t AC = A*C;
+ 374              		.loc 1 127 0
+ 375 0122 3B6B     		ldr	r3, [r7, #48]
+ 376 0124 FA6A     		ldr	r2, [r7, #44]
+ 377 0126 5343     		muls	r3, r2
+ 378 0128 3B62     		str	r3, [r7, #32]
+ 128:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	int32_t AD_CB = A*D + C*B;
+ 379              		.loc 1 128 0
+ 380 012a 3B6B     		ldr	r3, [r7, #48]
+ 381 012c 7A6A     		ldr	r2, [r7, #36]
+ 382 012e 5A43     		muls	r2, r3
+ 383 0130 FB6A     		ldr	r3, [r7, #44]
+ 384 0132 B96A     		ldr	r1, [r7, #40]
+ 385 0134 4B43     		muls	r3, r1
+ 386 0136 D318     		adds	r3, r2, r3
+ 387 0138 FB61     		str	r3, [r7, #28]
+ 129:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t BD = B*D;
+ 388              		.loc 1 129 0
+ 389 013a BB6A     		ldr	r3, [r7, #40]
+ 390 013c 7A6A     		ldr	r2, [r7, #36]
+ 391 013e 5343     		muls	r3, r2
+ 392 0140 BB61     		str	r3, [r7, #24]
+ 130:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 131:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	int32_t product_hi = AC + (AD_CB >> 16);
+ 393              		.loc 1 131 0
+ 394 0142 FB69     		ldr	r3, [r7, #28]
+ 395 0144 1B14     		asrs	r3, r3, #16
+ 396 0146 3A6A     		ldr	r2, [r7, #32]
+ 397 0148 D318     		adds	r3, r2, r3
+ 398 014a 7B63     		str	r3, [r7, #52]
+ 132:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 133:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Handle carry from lower 32 bits to upper part of result.
+ 134:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t ad_cb_temp = AD_CB << 16;
+ 399              		.loc 1 134 0
+ 400 014c FB69     		ldr	r3, [r7, #28]
+ 401 014e 1B04     		lsls	r3, r3, #16
+ 402 0150 7B61     		str	r3, [r7, #20]
+ 135:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t product_lo = BD + ad_cb_temp;
+ 403              		.loc 1 135 0
+ 404 0152 BA69     		ldr	r2, [r7, #24]
+ 405 0154 7B69     		ldr	r3, [r7, #20]
+ 406 0156 D318     		adds	r3, r2, r3
+ 407 0158 3B61     		str	r3, [r7, #16]
+ 136:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (product_lo < BD)
+ 408              		.loc 1 136 0
+ 409 015a 3A69     		ldr	r2, [r7, #16]
+ 410 015c BB69     		ldr	r3, [r7, #24]
+ 411 015e 9A42     		cmp	r2, r3
+ 412 0160 02D2     		bcs	.L22
+ 137:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		product_hi++;
+ 413              		.loc 1 137 0
+ 414 0162 7B6B     		ldr	r3, [r7, #52]
+ 415 0164 0133     		adds	r3, r3, #1
+ 416 0166 7B63     		str	r3, [r7, #52]
+ 417              	.L22:
+ 138:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 139:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #ifndef FIXMATH_NO_OVERFLOW
+ 140:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// The upper 17 bits should all be the same (the sign).
+ 141:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (product_hi >> 31 != product_hi >> 15)
+ 418              		.loc 1 141 0
+ 419 0168 7B6B     		ldr	r3, [r7, #52]
+ 420 016a DA17     		asrs	r2, r3, #31
+ 421 016c 7B6B     		ldr	r3, [r7, #52]
+ 422 016e DB13     		asrs	r3, r3, #15
+ 423 0170 9A42     		cmp	r2, r3
+ 424 0172 02D0     		beq	.L23
+ 142:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		return fix16_overflow;
+ 425              		.loc 1 142 0
+ 426 0174 8023     		movs	r3, #128
+ 427 0176 1B06     		lsls	r3, r3, #24
+ 428 0178 1EE0     		b	.L24
+ 429              	.L23:
+ 143:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 144:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 145:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #ifdef FIXMATH_NO_ROUNDING
+ 146:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return (product_hi << 16) | (product_lo >> 16);
+ 147:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #else
+ 148:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Subtracting 0x8000 (= 0.5) and then using signed right shift
+ 149:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// achieves proper rounding to result-1, except in the corner
+ 150:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// case of negative numbers and lowest word = 0x8000.
+ 151:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// To handle that, we also have to subtract 1 for negative numbers.
+ 152:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t product_lo_tmp = product_lo;
+ 430              		.loc 1 152 0
+ 431 017a 3B69     		ldr	r3, [r7, #16]
+ 432 017c FB60     		str	r3, [r7, #12]
+ 153:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	product_lo -= 0x8000;
+ 433              		.loc 1 153 0
+ 434 017e 3B69     		ldr	r3, [r7, #16]
+ 435 0180 0F4A     		ldr	r2, .L26
+ 436 0182 9446     		mov	ip, r2
+ 437 0184 6344     		add	r3, r3, ip
+ 438 0186 3B61     		str	r3, [r7, #16]
+ 154:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	product_lo -= (uint32_t)product_hi >> 31;
+ 439              		.loc 1 154 0
+ 440 0188 7B6B     		ldr	r3, [r7, #52]
+ 441 018a DB17     		asrs	r3, r3, #31
+ 442 018c 1A00     		movs	r2, r3
+ 443 018e 3B69     		ldr	r3, [r7, #16]
+ 444 0190 9B18     		adds	r3, r3, r2
+ 445 0192 3B61     		str	r3, [r7, #16]
+ 155:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (product_lo > product_lo_tmp)
+ 446              		.loc 1 155 0
+ 447 0194 3A69     		ldr	r2, [r7, #16]
+ 448 0196 FB68     		ldr	r3, [r7, #12]
+ 449 0198 9A42     		cmp	r2, r3
+ 450 019a 02D9     		bls	.L25
+ 156:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		product_hi--;
+ 451              		.loc 1 156 0
+ 452 019c 7B6B     		ldr	r3, [r7, #52]
+ 453 019e 013B     		subs	r3, r3, #1
+ 454 01a0 7B63     		str	r3, [r7, #52]
+ 455              	.L25:
+ 157:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 158:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Discard the lowest 16 bits. Note that this is not exactly the same
+ 159:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// as dividing by 0x10000. For example if product = -1, result will
+ 160:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// also be -1 and not 0. This is compensated by adding +1 to the result
+ 161:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// and compensating this in turn in the rounding above.
+ 162:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = (product_hi << 16) | (product_lo >> 16);
+ 456              		.loc 1 162 0
+ 457 01a2 7B6B     		ldr	r3, [r7, #52]
+ 458 01a4 1B04     		lsls	r3, r3, #16
+ 459 01a6 1A00     		movs	r2, r3
+ 460 01a8 3B69     		ldr	r3, [r7, #16]
+ 461 01aa 1B0C     		lsrs	r3, r3, #16
+ 462 01ac 1343     		orrs	r3, r2
+ 463 01ae BB60     		str	r3, [r7, #8]
+ 163:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	result += 1;
+ 464              		.loc 1 163 0
+ 465 01b0 BB68     		ldr	r3, [r7, #8]
+ 466 01b2 0133     		adds	r3, r3, #1
+ 467 01b4 BB60     		str	r3, [r7, #8]
+ 164:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 468              		.loc 1 164 0
+ 469 01b6 BB68     		ldr	r3, [r7, #8]
+ 470              	.L24:
+ 165:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 166:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 471              		.loc 1 166 0
+ 472 01b8 1800     		movs	r0, r3
+ 473 01ba BD46     		mov	sp, r7
+ 474 01bc 0EB0     		add	sp, sp, #56
+ 475              		@ sp needed
+ 476 01be 80BD     		pop	{r7, pc}
+ 477              	.L27:
+ 478              		.align	2
+ 479              	.L26:
+ 480 01c0 0080FFFF 		.word	-32768
+ 481              		.cfi_endproc
+ 482              	.LFE36:
+ 484              		.align	1
+ 485              		.global	fix16_smul
+ 486              		.syntax unified
+ 487              		.code	16
+ 488              		.thumb_func
+ 489              		.fpu softvfp
+ 491              	fix16_smul:
+ 492              	.LFB37:
+ 167:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 168:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 169:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* 8-bit implementation of fix16_mul. Fastest on e.g. Atmel AVR.
+ 170:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * Uses 8*8->16bit multiplications, and also skips any bytes that
+ 171:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * are zero.
+ 172:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  */
+ 173:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #if defined(FIXMATH_OPTIMIZE_8BIT)
+ 174:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_mul(fix16_t inArg0, fix16_t inArg1)
+ 175:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 176:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t _a = (inArg0 >= 0) ? inArg0 : (-inArg0);
+ 177:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t _b = (inArg1 >= 0) ? inArg1 : (-inArg1);
+ 178:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 179:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint8_t va[4] = {_a, (_a >> 8), (_a >> 16), (_a >> 24)};
+ 180:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint8_t vb[4] = {_b, (_b >> 8), (_b >> 16), (_b >> 24)};
+ 181:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 182:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t low = 0;
+ 183:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t mid = 0;
+ 184:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 185:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Result column i depends on va[0..i] and vb[i..0]
+ 186:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 187:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_OVERFLOW
+ 188:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// i = 6
+ 189:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[3] && vb[3]) return fix16_overflow;
+ 190:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 191:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 192:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// i = 5
+ 193:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[2] && vb[3]) mid += (uint16_t)va[2] * vb[3];
+ 194:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[3] && vb[2]) mid += (uint16_t)va[3] * vb[2];
+ 195:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	mid <<= 8;
+ 196:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 197:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// i = 4
+ 198:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[1] && vb[3]) mid += (uint16_t)va[1] * vb[3];
+ 199:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[2] && vb[2]) mid += (uint16_t)va[2] * vb[2];
+ 200:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[3] && vb[1]) mid += (uint16_t)va[3] * vb[1];
+ 201:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 202:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_OVERFLOW
+ 203:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (mid & 0xFF000000) return fix16_overflow;
+ 204:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 205:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	mid <<= 8;
+ 206:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 207:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// i = 3
+ 208:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[0] && vb[3]) mid += (uint16_t)va[0] * vb[3];
+ 209:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[1] && vb[2]) mid += (uint16_t)va[1] * vb[2];
+ 210:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[2] && vb[1]) mid += (uint16_t)va[2] * vb[1];
+ 211:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[3] && vb[0]) mid += (uint16_t)va[3] * vb[0];
+ 212:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 213:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_OVERFLOW
+ 214:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (mid & 0xFF000000) return fix16_overflow;
+ 215:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 216:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	mid <<= 8;
+ 217:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 218:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// i = 2
+ 219:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[0] && vb[2]) mid += (uint16_t)va[0] * vb[2];
+ 220:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[1] && vb[1]) mid += (uint16_t)va[1] * vb[1];
+ 221:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[2] && vb[0]) mid += (uint16_t)va[2] * vb[0];		
+ 222:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 223:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// i = 1
+ 224:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[0] && vb[1]) low += (uint16_t)va[0] * vb[1];
+ 225:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[1] && vb[0]) low += (uint16_t)va[1] * vb[0];
+ 226:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	low <<= 8;
+ 227:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 228:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// i = 0
+ 229:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (va[0] && vb[0]) low += (uint16_t)va[0] * vb[0];
+ 230:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 231:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_ROUNDING
+ 232:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	low += 0x8000;
+ 233:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 234:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	mid += (low >> 16);
+ 235:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 236:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_OVERFLOW
+ 237:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (mid & 0x80000000)
+ 238:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		return fix16_overflow;
+ 239:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 240:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 241:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = mid;
+ 242:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 243:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	/* Figure out the sign of result */
+ 244:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if ((inArg0 >= 0) != (inArg1 >= 0))
+ 245:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 246:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		result = -result;
+ 247:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 248:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 249:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 250:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 251:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 252:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 253:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #ifndef FIXMATH_NO_OVERFLOW
+ 254:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* Wrapper around fix16_mul to add saturating arithmetic. */
+ 255:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_smul(fix16_t inArg0, fix16_t inArg1)
+ 256:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 493              		.loc 1 256 0
+ 494              		.cfi_startproc
+ 495              		@ args = 0, pretend = 0, frame = 16
+ 496              		@ frame_needed = 1, uses_anonymous_args = 0
+ 497 01c4 80B5     		push	{r7, lr}
+ 498              		.cfi_def_cfa_offset 8
+ 499              		.cfi_offset 7, -8
+ 500              		.cfi_offset 14, -4
+ 501 01c6 84B0     		sub	sp, sp, #16
+ 502              		.cfi_def_cfa_offset 24
+ 503 01c8 00AF     		add	r7, sp, #0
+ 504              		.cfi_def_cfa_register 7
+ 505 01ca 7860     		str	r0, [r7, #4]
+ 506 01cc 3960     		str	r1, [r7]
+ 257:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = fix16_mul(inArg0, inArg1);
+ 507              		.loc 1 257 0
+ 508 01ce 3A68     		ldr	r2, [r7]
+ 509 01d0 7B68     		ldr	r3, [r7, #4]
+ 510 01d2 1100     		movs	r1, r2
+ 511 01d4 1800     		movs	r0, r3
+ 512 01d6 FFF7FEFF 		bl	fix16_mul
+ 513 01da 0300     		movs	r3, r0
+ 514 01dc FB60     		str	r3, [r7, #12]
+ 258:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 259:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (result == fix16_overflow)
+ 515              		.loc 1 259 0
+ 516 01de 8023     		movs	r3, #128
+ 517 01e0 1B06     		lsls	r3, r3, #24
+ 518 01e2 FA68     		ldr	r2, [r7, #12]
+ 519 01e4 9A42     		cmp	r2, r3
+ 520 01e6 0FD1     		bne	.L29
+ 260:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 261:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if ((inArg0 >= 0) == (inArg1 >= 0))
+ 521              		.loc 1 261 0
+ 522 01e8 7B68     		ldr	r3, [r7, #4]
+ 523 01ea DB0F     		lsrs	r3, r3, #31
+ 524 01ec DAB2     		uxtb	r2, r3
+ 525 01ee 3B68     		ldr	r3, [r7]
+ 526 01f0 DB43     		mvns	r3, r3
+ 527 01f2 DB0F     		lsrs	r3, r3, #31
+ 528 01f4 DBB2     		uxtb	r3, r3
+ 529 01f6 5340     		eors	r3, r2
+ 530 01f8 DBB2     		uxtb	r3, r3
+ 531 01fa 002B     		cmp	r3, #0
+ 532 01fc 01D0     		beq	.L30
+ 262:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 			return fix16_maximum;
+ 533              		.loc 1 262 0
+ 534 01fe 054B     		ldr	r3, .L32
+ 535 0200 03E0     		b	.L31
+ 536              	.L30:
+ 263:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		else
+ 264:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 			return fix16_minimum;
+ 537              		.loc 1 264 0
+ 538 0202 8023     		movs	r3, #128
+ 539 0204 1B06     		lsls	r3, r3, #24
+ 540 0206 00E0     		b	.L31
+ 541              	.L29:
+ 265:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 266:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 267:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 542              		.loc 1 267 0
+ 543 0208 FB68     		ldr	r3, [r7, #12]
+ 544              	.L31:
+ 268:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 545              		.loc 1 268 0
+ 546 020a 1800     		movs	r0, r3
+ 547 020c BD46     		mov	sp, r7
+ 548 020e 04B0     		add	sp, sp, #16
+ 549              		@ sp needed
+ 550 0210 80BD     		pop	{r7, pc}
+ 551              	.L33:
+ 552 0212 C046     		.align	2
+ 553              	.L32:
+ 554 0214 FFFFFF7F 		.word	2147483647
+ 555              		.cfi_endproc
+ 556              	.LFE37:
+ 558              		.align	1
+ 559              		.syntax unified
+ 560              		.code	16
+ 561              		.thumb_func
+ 562              		.fpu softvfp
+ 564              	clz:
+ 565              	.LFB38:
+ 269:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 270:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 271:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* 32-bit implementation of fix16_div. Fastest version for e.g. ARM Cortex M3.
+ 272:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * Performs 32-bit divisions repeatedly to reduce the remainder. For this to
+ 273:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * be efficient, the processor has to have 32-bit hardware division.
+ 274:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  */
+ 275:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #if !defined(FIXMATH_OPTIMIZE_8BIT)
+ 276:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //#ifdef __GNUC__
+ 277:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** // Count leading zeros, using processor-specific instruction if available.
+ 278:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //#define clz(x) (__builtin_clzl(x) - (8 * sizeof(long) - 32))
+ 279:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //#else
+ 280:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** static uint8_t clz(uint32_t x)
+ 281:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 566              		.loc 1 281 0
+ 567              		.cfi_startproc
+ 568              		@ args = 0, pretend = 0, frame = 16
+ 569              		@ frame_needed = 1, uses_anonymous_args = 0
+ 570 0218 80B5     		push	{r7, lr}
+ 571              		.cfi_def_cfa_offset 8
+ 572              		.cfi_offset 7, -8
+ 573              		.cfi_offset 14, -4
+ 574 021a 84B0     		sub	sp, sp, #16
+ 575              		.cfi_def_cfa_offset 24
+ 576 021c 00AF     		add	r7, sp, #0
+ 577              		.cfi_def_cfa_register 7
+ 578 021e 7860     		str	r0, [r7, #4]
+ 282:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint8_t result = 0;
+ 579              		.loc 1 282 0
+ 580 0220 0F23     		movs	r3, #15
+ 581 0222 FB18     		adds	r3, r7, r3
+ 582 0224 0022     		movs	r2, #0
+ 583 0226 1A70     		strb	r2, [r3]
+ 283:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (x == 0) return 32;
+ 584              		.loc 1 283 0
+ 585 0228 7B68     		ldr	r3, [r7, #4]
+ 586 022a 002B     		cmp	r3, #0
+ 587 022c 0AD1     		bne	.L37
+ 588              		.loc 1 283 0 is_stmt 0 discriminator 1
+ 589 022e 2023     		movs	r3, #32
+ 590 0230 1CE0     		b	.L36
+ 591              	.L38:
+ 284:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	while (!(x & 0xF0000000)) { result += 4; x <<= 4; }
+ 592              		.loc 1 284 0 is_stmt 1 discriminator 2
+ 593 0232 0F22     		movs	r2, #15
+ 594 0234 BB18     		adds	r3, r7, r2
+ 595 0236 BA18     		adds	r2, r7, r2
+ 596 0238 1278     		ldrb	r2, [r2]
+ 597 023a 0432     		adds	r2, r2, #4
+ 598 023c 1A70     		strb	r2, [r3]
+ 599 023e 7B68     		ldr	r3, [r7, #4]
+ 600 0240 1B01     		lsls	r3, r3, #4
+ 601 0242 7B60     		str	r3, [r7, #4]
+ 602              	.L37:
+ 603              		.loc 1 284 0 is_stmt 0 discriminator 1
+ 604 0244 7B68     		ldr	r3, [r7, #4]
+ 605 0246 1B0F     		lsrs	r3, r3, #28
+ 606 0248 1B07     		lsls	r3, r3, #28
+ 607 024a F2D0     		beq	.L38
+ 285:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	while (!(x & 0x80000000)) { result += 1; x <<= 1; }
+ 608              		.loc 1 285 0 is_stmt 1
+ 609 024c 08E0     		b	.L39
+ 610              	.L40:
+ 611              		.loc 1 285 0 is_stmt 0 discriminator 2
+ 612 024e 0F22     		movs	r2, #15
+ 613 0250 BB18     		adds	r3, r7, r2
+ 614 0252 BA18     		adds	r2, r7, r2
+ 615 0254 1278     		ldrb	r2, [r2]
+ 616 0256 0132     		adds	r2, r2, #1
+ 617 0258 1A70     		strb	r2, [r3]
+ 618 025a 7B68     		ldr	r3, [r7, #4]
+ 619 025c 5B00     		lsls	r3, r3, #1
+ 620 025e 7B60     		str	r3, [r7, #4]
+ 621              	.L39:
+ 622              		.loc 1 285 0 discriminator 1
+ 623 0260 7B68     		ldr	r3, [r7, #4]
+ 624 0262 002B     		cmp	r3, #0
+ 625 0264 F3DA     		bge	.L40
+ 286:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 626              		.loc 1 286 0 is_stmt 1
+ 627 0266 0F23     		movs	r3, #15
+ 628 0268 FB18     		adds	r3, r7, r3
+ 629 026a 1B78     		ldrb	r3, [r3]
+ 630              	.L36:
+ 287:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 631              		.loc 1 287 0
+ 632 026c 1800     		movs	r0, r3
+ 633 026e BD46     		mov	sp, r7
+ 634 0270 04B0     		add	sp, sp, #16
+ 635              		@ sp needed
+ 636 0272 80BD     		pop	{r7, pc}
+ 637              		.cfi_endproc
+ 638              	.LFE38:
+ 640              		.align	1
+ 641              		.global	fix16_div
+ 642              		.syntax unified
+ 643              		.code	16
+ 644              		.thumb_func
+ 645              		.fpu softvfp
+ 647              	fix16_div:
+ 648              	.LFB39:
+ 288:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //#endif
+ 289:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 290:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_div(fix16_t a, fix16_t b)
+ 291:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 649              		.loc 1 291 0
+ 650              		.cfi_startproc
+ 651              		@ args = 0, pretend = 0, frame = 40
+ 652              		@ frame_needed = 1, uses_anonymous_args = 0
+ 653 0274 80B5     		push	{r7, lr}
+ 654              		.cfi_def_cfa_offset 8
+ 655              		.cfi_offset 7, -8
+ 656              		.cfi_offset 14, -4
+ 657 0276 8AB0     		sub	sp, sp, #40
+ 658              		.cfi_def_cfa_offset 48
+ 659 0278 00AF     		add	r7, sp, #0
+ 660              		.cfi_def_cfa_register 7
+ 661 027a 7860     		str	r0, [r7, #4]
+ 662 027c 3960     		str	r1, [r7]
+ 292:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// This uses a hardware 32/32 bit division multiple times, until we have
+ 293:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// computed all the bits in (a<<17)/b. Usually this takes 1-3 iterations.
+ 294:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 295:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (b == 0)
+ 663              		.loc 1 295 0
+ 664 027e 3B68     		ldr	r3, [r7]
+ 665 0280 002B     		cmp	r3, #0
+ 666 0282 02D1     		bne	.L42
+ 296:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 			return fix16_minimum;
+ 667              		.loc 1 296 0
+ 668 0284 8023     		movs	r3, #128
+ 669 0286 1B06     		lsls	r3, r3, #24
+ 670 0288 76E0     		b	.L43
+ 671              	.L42:
+ 297:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 298:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t remainder = (a >= 0) ? a : (-a);
+ 672              		.loc 1 298 0
+ 673 028a 7B68     		ldr	r3, [r7, #4]
+ 674 028c DA17     		asrs	r2, r3, #31
+ 675 028e 9B18     		adds	r3, r3, r2
+ 676 0290 5340     		eors	r3, r2
+ 677 0292 7B62     		str	r3, [r7, #36]
+ 299:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t divider = (b >= 0) ? b : (-b);
+ 678              		.loc 1 299 0
+ 679 0294 3B68     		ldr	r3, [r7]
+ 680 0296 DA17     		asrs	r2, r3, #31
+ 681 0298 9B18     		adds	r3, r3, r2
+ 682 029a 5340     		eors	r3, r2
+ 683 029c 3B62     		str	r3, [r7, #32]
+ 300:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t quotient = 0;
+ 684              		.loc 1 300 0
+ 685 029e 0023     		movs	r3, #0
+ 686 02a0 FB61     		str	r3, [r7, #28]
+ 301:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	int bit_pos = 17;
+ 687              		.loc 1 301 0
+ 688 02a2 1123     		movs	r3, #17
+ 689 02a4 BB61     		str	r3, [r7, #24]
+ 302:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 303:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Kick-start the division a bit.
+ 304:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// This improves speed in the worst-case scenarios where N and D are large
+ 305:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// It gets a lower estimate for the result by N/(D >> 17 + 1).
+ 306:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //	if (divider & 0xFFF00000)
+ 307:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //	{
+ 308:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //		uint32_t shifted_div = ((divider >> 17) + 1);
+ 309:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //		quotient = remainder / shifted_div;
+ 310:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //        quotient = divide_u(remainder, shifted_div);
+ 311:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //		remainder -= ((uint64_t)quotient * divider) >> 17;
+ 312:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //	}
+ 313:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 314:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// If the divider is divisible by 2^n, take advantage of it.
+ 315:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	while (!(divider & 0xF) && bit_pos >= 4)
+ 690              		.loc 1 315 0
+ 691 02a6 05E0     		b	.L44
+ 692              	.L46:
+ 316:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 317:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		divider >>= 4;
+ 693              		.loc 1 317 0
+ 694 02a8 3B6A     		ldr	r3, [r7, #32]
+ 695 02aa 1B09     		lsrs	r3, r3, #4
+ 696 02ac 3B62     		str	r3, [r7, #32]
+ 318:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		bit_pos -= 4;
+ 697              		.loc 1 318 0
+ 698 02ae BB69     		ldr	r3, [r7, #24]
+ 699 02b0 043B     		subs	r3, r3, #4
+ 700 02b2 BB61     		str	r3, [r7, #24]
+ 701              	.L44:
+ 315:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 702              		.loc 1 315 0
+ 703 02b4 3B6A     		ldr	r3, [r7, #32]
+ 704 02b6 0F22     		movs	r2, #15
+ 705 02b8 1340     		ands	r3, r2
+ 706 02ba 41D1     		bne	.L47
+ 315:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 707              		.loc 1 315 0 is_stmt 0 discriminator 1
+ 708 02bc BB69     		ldr	r3, [r7, #24]
+ 709 02be 032B     		cmp	r3, #3
+ 710 02c0 F2DC     		bgt	.L46
+ 319:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 320:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 321:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	while (remainder && bit_pos >= 0)
+ 711              		.loc 1 321 0 is_stmt 1
+ 712 02c2 3DE0     		b	.L47
+ 713              	.L51:
+ 714              	.LBB2:
+ 322:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 323:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		// Shift remainder as much as we can without overflowing
+ 324:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		int shift = clz(remainder);
+ 715              		.loc 1 324 0
+ 716 02c4 7B6A     		ldr	r3, [r7, #36]
+ 717 02c6 1800     		movs	r0, r3
+ 718 02c8 FFF7A6FF 		bl	clz
+ 719 02cc 0300     		movs	r3, r0
+ 720 02ce 7B61     		str	r3, [r7, #20]
+ 325:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if (shift > bit_pos) shift = bit_pos;
+ 721              		.loc 1 325 0
+ 722 02d0 7A69     		ldr	r2, [r7, #20]
+ 723 02d2 BB69     		ldr	r3, [r7, #24]
+ 724 02d4 9A42     		cmp	r2, r3
+ 725 02d6 01DD     		ble	.L48
+ 726              		.loc 1 325 0 is_stmt 0 discriminator 1
+ 727 02d8 BB69     		ldr	r3, [r7, #24]
+ 728 02da 7B61     		str	r3, [r7, #20]
+ 729              	.L48:
+ 326:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		remainder <<= shift;
+ 730              		.loc 1 326 0 is_stmt 1
+ 731 02dc 7A6A     		ldr	r2, [r7, #36]
+ 732 02de 7B69     		ldr	r3, [r7, #20]
+ 733 02e0 9A40     		lsls	r2, r2, r3
+ 734 02e2 1300     		movs	r3, r2
+ 735 02e4 7B62     		str	r3, [r7, #36]
+ 327:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		bit_pos -= shift;
+ 736              		.loc 1 327 0
+ 737 02e6 BA69     		ldr	r2, [r7, #24]
+ 738 02e8 7B69     		ldr	r3, [r7, #20]
+ 739 02ea D31A     		subs	r3, r2, r3
+ 740 02ec BB61     		str	r3, [r7, #24]
+ 328:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		
+ 329:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //		uint32_t div = remainder / divider;
+ 330:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****         uint32_t div = divide_u(remainder, divider);
+ 741              		.loc 1 330 0
+ 742 02ee 3A6A     		ldr	r2, [r7, #32]
+ 743 02f0 7B6A     		ldr	r3, [r7, #36]
+ 744 02f2 1100     		movs	r1, r2
+ 745 02f4 1800     		movs	r0, r3
+ 746 02f6 FFF7FEFF 		bl	divide_u
+ 747 02fa 0300     		movs	r3, r0
+ 748 02fc FB60     		str	r3, [r7, #12]
+ 331:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** //		remainder = remainder % divider;
+ 332:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****         remainder = mod(remainder, divider);
+ 749              		.loc 1 332 0
+ 750 02fe 7B6A     		ldr	r3, [r7, #36]
+ 751 0300 3A6A     		ldr	r2, [r7, #32]
+ 752 0302 1100     		movs	r1, r2
+ 753 0304 1800     		movs	r0, r3
+ 754 0306 FFF7FEFF 		bl	mod
+ 755 030a 0300     		movs	r3, r0
+ 756 030c 7B62     		str	r3, [r7, #36]
+ 333:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		quotient += div << bit_pos;
+ 757              		.loc 1 333 0
+ 758 030e FA68     		ldr	r2, [r7, #12]
+ 759 0310 BB69     		ldr	r3, [r7, #24]
+ 760 0312 9A40     		lsls	r2, r2, r3
+ 761 0314 1300     		movs	r3, r2
+ 762 0316 FA69     		ldr	r2, [r7, #28]
+ 763 0318 D318     		adds	r3, r2, r3
+ 764 031a FB61     		str	r3, [r7, #28]
+ 334:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 335:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#ifndef FIXMATH_NO_OVERFLOW
+ 336:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if (div & ~(0xFFFFFFFF >> bit_pos))
+ 765              		.loc 1 336 0
+ 766 031c 0123     		movs	r3, #1
+ 767 031e 5A42     		rsbs	r2, r3, #0
+ 768 0320 BB69     		ldr	r3, [r7, #24]
+ 769 0322 DA40     		lsrs	r2, r2, r3
+ 770 0324 1300     		movs	r3, r2
+ 771 0326 DB43     		mvns	r3, r3
+ 772 0328 FA68     		ldr	r2, [r7, #12]
+ 773 032a 1340     		ands	r3, r2
+ 774 032c 02D0     		beq	.L49
+ 337:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				return fix16_overflow;
+ 775              		.loc 1 337 0
+ 776 032e 8023     		movs	r3, #128
+ 777 0330 1B06     		lsls	r3, r3, #24
+ 778 0332 21E0     		b	.L43
+ 779              	.L49:
+ 338:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#endif
+ 339:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		
+ 340:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		remainder <<= 1;
+ 780              		.loc 1 340 0
+ 781 0334 7B6A     		ldr	r3, [r7, #36]
+ 782 0336 5B00     		lsls	r3, r3, #1
+ 783 0338 7B62     		str	r3, [r7, #36]
+ 341:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		bit_pos--;
+ 784              		.loc 1 341 0
+ 785 033a BB69     		ldr	r3, [r7, #24]
+ 786 033c 013B     		subs	r3, r3, #1
+ 787 033e BB61     		str	r3, [r7, #24]
+ 788              	.L47:
+ 789              	.LBE2:
+ 321:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 790              		.loc 1 321 0
+ 791 0340 7B6A     		ldr	r3, [r7, #36]
+ 792 0342 002B     		cmp	r3, #0
+ 793 0344 02D0     		beq	.L50
+ 321:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 794              		.loc 1 321 0 is_stmt 0 discriminator 1
+ 795 0346 BB69     		ldr	r3, [r7, #24]
+ 796 0348 002B     		cmp	r3, #0
+ 797 034a BBDA     		bge	.L51
+ 798              	.L50:
+ 342:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 343:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 344:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_ROUNDING
+ 345:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Quotient is always positive so rounding is easy
+ 346:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	quotient++;
+ 799              		.loc 1 346 0 is_stmt 1
+ 800 034c FB69     		ldr	r3, [r7, #28]
+ 801 034e 0133     		adds	r3, r3, #1
+ 802 0350 FB61     		str	r3, [r7, #28]
+ 347:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 348:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 349:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = quotient >> 1;
+ 803              		.loc 1 349 0
+ 804 0352 FB69     		ldr	r3, [r7, #28]
+ 805 0354 5B08     		lsrs	r3, r3, #1
+ 806 0356 3B61     		str	r3, [r7, #16]
+ 350:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 351:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// Figure out the sign of the result
+ 352:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if ((a ^ b) & 0x80000000)
+ 807              		.loc 1 352 0
+ 808 0358 7A68     		ldr	r2, [r7, #4]
+ 809 035a 3B68     		ldr	r3, [r7]
+ 810 035c 5340     		eors	r3, r2
+ 811 035e 0AD5     		bpl	.L52
+ 353:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 354:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#ifndef FIXMATH_NO_OVERFLOW
+ 355:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if (result == fix16_minimum)
+ 812              		.loc 1 355 0
+ 813 0360 8023     		movs	r3, #128
+ 814 0362 1B06     		lsls	r3, r3, #24
+ 815 0364 3A69     		ldr	r2, [r7, #16]
+ 816 0366 9A42     		cmp	r2, r3
+ 817 0368 02D1     		bne	.L53
+ 356:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				return fix16_overflow;
+ 818              		.loc 1 356 0
+ 819 036a 8023     		movs	r3, #128
+ 820 036c 1B06     		lsls	r3, r3, #24
+ 821 036e 03E0     		b	.L43
+ 822              	.L53:
+ 357:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#endif
+ 358:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		
+ 359:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		result = -result;
+ 823              		.loc 1 359 0
+ 824 0370 3B69     		ldr	r3, [r7, #16]
+ 825 0372 5B42     		rsbs	r3, r3, #0
+ 826 0374 3B61     		str	r3, [r7, #16]
+ 827              	.L52:
+ 360:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 361:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 362:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 828              		.loc 1 362 0
+ 829 0376 3B69     		ldr	r3, [r7, #16]
+ 830              	.L43:
+ 363:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 831              		.loc 1 363 0
+ 832 0378 1800     		movs	r0, r3
+ 833 037a BD46     		mov	sp, r7
+ 834 037c 0AB0     		add	sp, sp, #40
+ 835              		@ sp needed
+ 836 037e 80BD     		pop	{r7, pc}
+ 837              		.cfi_endproc
+ 838              	.LFE39:
+ 840              		.align	1
+ 841              		.global	fix16_sdiv
+ 842              		.syntax unified
+ 843              		.code	16
+ 844              		.thumb_func
+ 845              		.fpu softvfp
+ 847              	fix16_sdiv:
+ 848              	.LFB40:
+ 364:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 365:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 366:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* Alternative 32-bit implementation of fix16_div. Fastest on e.g. Atmel AVR.
+ 367:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * This does the division manually, and is therefore good for processors that
+ 368:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  * do not have hardware division.
+ 369:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c ****  */
+ 370:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #if defined(FIXMATH_OPTIMIZE_8BIT)
+ 371:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_div(fix16_t a, fix16_t b)
+ 372:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 373:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// This uses the basic binary restoring division algorithm.
+ 374:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// It appears to be faster to do the whole division manually than
+ 375:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// trying to compose a 64-bit libdivide out of 32-bit divisions on
+ 376:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	// platforms without hardware libdivide.
+ 377:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 378:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (b == 0)
+ 379:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		return fix16_minimum;
+ 380:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 381:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t remainder = (a >= 0) ? a : (-a);
+ 382:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t divider = (b >= 0) ? b : (-b);
+ 383:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 384:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t quotient = 0;
+ 385:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	uint32_t bit = 0x10000;
+ 386:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 387:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	/* The algorithm requires D >= R */
+ 388:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	while (divider < remainder)
+ 389:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 390:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		divider <<= 1;
+ 391:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		bit <<= 1;
+ 392:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 393:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 394:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_OVERFLOW
+ 395:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (!bit)
+ 396:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		return fix16_overflow;
+ 397:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 398:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 399:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (divider & 0x80000000)
+ 400:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 401:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		// Perform one step manually to avoid overflows later.
+ 402:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		// We know that divider's bottom bit is 0 here.
+ 403:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if (remainder >= divider)
+ 404:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		{
+ 405:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				quotient |= bit;
+ 406:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				remainder -= divider;
+ 407:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		}
+ 408:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		divider >>= 1;
+ 409:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		bit >>= 1;
+ 410:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 411:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 412:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	/* Main division loop */
+ 413:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	while (bit && remainder)
+ 414:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 415:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if (remainder >= divider)
+ 416:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		{
+ 417:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				quotient |= bit;
+ 418:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				remainder -= divider;
+ 419:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		}
+ 420:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		
+ 421:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		remainder <<= 1;
+ 422:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		bit >>= 1;
+ 423:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}	 
+ 424:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 			
+ 425:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifndef FIXMATH_NO_ROUNDING
+ 426:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (remainder >= divider)
+ 427:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 428:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		quotient++;
+ 429:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 430:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 431:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 432:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = quotient;
+ 433:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 434:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	/* Figure out the sign of result */
+ 435:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if ((a ^ b) & 0x80000000)
+ 436:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 437:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#ifndef FIXMATH_NO_OVERFLOW
+ 438:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if (result == fix16_minimum)
+ 439:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 				return fix16_overflow;
+ 440:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		#endif
+ 441:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		
+ 442:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		result = -result;
+ 443:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 444:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 445:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 446:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 447:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 448:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 449:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #ifndef FIXMATH_NO_OVERFLOW
+ 450:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** /* Wrapper around fix16_div to add saturating arithmetic. */
+ 451:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_sdiv(fix16_t inArg0, fix16_t inArg1)
+ 452:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 849              		.loc 1 452 0
+ 850              		.cfi_startproc
+ 851              		@ args = 0, pretend = 0, frame = 16
+ 852              		@ frame_needed = 1, uses_anonymous_args = 0
+ 853 0380 80B5     		push	{r7, lr}
+ 854              		.cfi_def_cfa_offset 8
+ 855              		.cfi_offset 7, -8
+ 856              		.cfi_offset 14, -4
+ 857 0382 84B0     		sub	sp, sp, #16
+ 858              		.cfi_def_cfa_offset 24
+ 859 0384 00AF     		add	r7, sp, #0
+ 860              		.cfi_def_cfa_register 7
+ 861 0386 7860     		str	r0, [r7, #4]
+ 862 0388 3960     		str	r1, [r7]
+ 453:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	fix16_t result = fix16_div(inArg0, inArg1);
+ 863              		.loc 1 453 0
+ 864 038a 3A68     		ldr	r2, [r7]
+ 865 038c 7B68     		ldr	r3, [r7, #4]
+ 866 038e 1100     		movs	r1, r2
+ 867 0390 1800     		movs	r0, r3
+ 868 0392 FFF7FEFF 		bl	fix16_div
+ 869 0396 0300     		movs	r3, r0
+ 870 0398 FB60     		str	r3, [r7, #12]
+ 454:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 455:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	if (result == fix16_overflow)
+ 871              		.loc 1 455 0
+ 872 039a 8023     		movs	r3, #128
+ 873 039c 1B06     		lsls	r3, r3, #24
+ 874 039e FA68     		ldr	r2, [r7, #12]
+ 875 03a0 9A42     		cmp	r2, r3
+ 876 03a2 0FD1     		bne	.L55
+ 456:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	{
+ 457:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		if ((inArg0 >= 0) == (inArg1 >= 0))
+ 877              		.loc 1 457 0
+ 878 03a4 7B68     		ldr	r3, [r7, #4]
+ 879 03a6 DB0F     		lsrs	r3, r3, #31
+ 880 03a8 DAB2     		uxtb	r2, r3
+ 881 03aa 3B68     		ldr	r3, [r7]
+ 882 03ac DB43     		mvns	r3, r3
+ 883 03ae DB0F     		lsrs	r3, r3, #31
+ 884 03b0 DBB2     		uxtb	r3, r3
+ 885 03b2 5340     		eors	r3, r2
+ 886 03b4 DBB2     		uxtb	r3, r3
+ 887 03b6 002B     		cmp	r3, #0
+ 888 03b8 01D0     		beq	.L56
+ 458:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 			return fix16_maximum;
+ 889              		.loc 1 458 0
+ 890 03ba 054B     		ldr	r3, .L58
+ 891 03bc 03E0     		b	.L57
+ 892              	.L56:
+ 459:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		else
+ 460:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 			return fix16_minimum;
+ 893              		.loc 1 460 0
+ 894 03be 8023     		movs	r3, #128
+ 895 03c0 1B06     		lsls	r3, r3, #24
+ 896 03c2 00E0     		b	.L57
+ 897              	.L55:
+ 461:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	}
+ 462:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	
+ 463:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return result;
+ 898              		.loc 1 463 0
+ 899 03c4 FB68     		ldr	r3, [r7, #12]
+ 900              	.L57:
+ 464:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 901              		.loc 1 464 0
+ 902 03c6 1800     		movs	r0, r3
+ 903 03c8 BD46     		mov	sp, r7
+ 904 03ca 04B0     		add	sp, sp, #16
+ 905              		@ sp needed
+ 906 03cc 80BD     		pop	{r7, pc}
+ 907              	.L59:
+ 908 03ce C046     		.align	2
+ 909              	.L58:
+ 910 03d0 FFFFFF7F 		.word	2147483647
+ 911              		.cfi_endproc
+ 912              	.LFE40:
+ 914              		.global	__aeabi_idivmod
+ 915              		.align	1
+ 916              		.global	fix16_mod
+ 917              		.syntax unified
+ 918              		.code	16
+ 919              		.thumb_func
+ 920              		.fpu softvfp
+ 922              	fix16_mod:
+ 923              	.LFB41:
+ 465:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** #endif
+ 466:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 467:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** fix16_t fix16_mod(fix16_t x, fix16_t y)
+ 468:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** {
+ 924              		.loc 1 468 0
+ 925              		.cfi_startproc
+ 926              		@ args = 0, pretend = 0, frame = 8
+ 927              		@ frame_needed = 1, uses_anonymous_args = 0
+ 928 03d4 80B5     		push	{r7, lr}
+ 929              		.cfi_def_cfa_offset 8
+ 930              		.cfi_offset 7, -8
+ 931              		.cfi_offset 14, -4
+ 932 03d6 82B0     		sub	sp, sp, #8
+ 933              		.cfi_def_cfa_offset 16
+ 934 03d8 00AF     		add	r7, sp, #0
+ 935              		.cfi_def_cfa_register 7
+ 936 03da 7860     		str	r0, [r7, #4]
+ 937 03dc 3960     		str	r1, [r7]
+ 469:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#ifdef FIXMATH_OPTIMIZE_8BIT
+ 470:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		/* The reason we do this, rather than use a modulo operator
+ 471:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		 * is that if you don't have a hardware divider, this will result
+ 472:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		 * in faster operations when the angles are close to the bounds. 
+ 473:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		 */
+ 474:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		while(x >=  y) x -= y;
+ 475:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		while(x <= -y) x += y;
+ 476:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#else
+ 477:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		/* Note that in C90, the sign of result of the modulo operation is
+ 478:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		 * undefined. in C99, it's the same as the dividend (aka numerator).
+ 479:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		 */
+ 480:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 		x %= y;
+ 938              		.loc 1 480 0
+ 939 03de 7B68     		ldr	r3, [r7, #4]
+ 940 03e0 3968     		ldr	r1, [r7]
+ 941 03e2 1800     		movs	r0, r3
+ 942 03e4 FFF7FEFF 		bl	__aeabi_idivmod
+ 943              	.LVL0:
+ 944 03e8 0B00     		movs	r3, r1
+ 945 03ea 7B60     		str	r3, [r7, #4]
+ 481:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	#endif
+ 482:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 
+ 483:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** 	return x;
+ 946              		.loc 1 483 0
+ 947 03ec 7B68     		ldr	r3, [r7, #4]
+ 484:/Users/legge/Development/moppen-game/shared/libfixmath/fix16.c **** }
+ 948              		.loc 1 484 0
+ 949 03ee 1800     		movs	r0, r3
+ 950 03f0 BD46     		mov	sp, r7
+ 951 03f2 02B0     		add	sp, sp, #8
+ 952              		@ sp needed
+ 953 03f4 80BD     		pop	{r7, pc}
+ 954              		.cfi_endproc
+ 955              	.LFE41:
+ 957              	.Letext0:
+ 958              		.file 2 "/Applications/codelite.app/Contents/SharedSupport/tools/gcc-arm-custom/arm-none-eabi/incl
+ 959              		.file 3 "/Applications/codelite.app/Contents/SharedSupport/tools/gcc-arm-custom/arm-none-eabi/incl
+ 960              		.file 4 "/Users/legge/Development/moppen-game/shared/libfixmath/fix16.h"

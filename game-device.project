@@ -23,6 +23,10 @@
     <File Name="device/device_runtime.h"/>
     <File Name="device/device_runtime.c"/>
     <VirtualDirectory Name="shared">
+      <VirtualDirectory Name="libdivide">
+        <File Name="shared/libdivide/libdivide.h"/>
+        <File Name="shared/libdivide/libdivide.c"/>
+      </VirtualDirectory>
       <VirtualDirectory Name="libfixmatrix">
         <File Name="shared/libfixmatrix/fixvector4d.h"/>
         <File Name="shared/libfixmatrix/fixvector4d.c"/>
@@ -88,6 +92,7 @@
         <IncludePath Value="."/>
         <Preprocessor Value="FIXMATH_NO_CACHE=1"/>
         <Preprocessor Value="FIXMATH_NO_64BIT=1"/>
+        <Preprocessor Value="FIXMATH_FAST_SIN=1"/>
       </Compiler>
       <Linker Options="-T$(ProjectPath)/md407-ram.x;-L$(ARM_V6LIB) -L$(ARM_GCC_V6LIB);-nostdlib" Required="yes">
         <Library Value="gcc"/>

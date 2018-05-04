@@ -3,6 +3,7 @@
 #include "../shared/game.h"
 #include "../shared/external.h"
 
+#include "../shared/libdivide/libdivide.h"
 int main(int argc, char *argv[]) {
     emulator_init();
     game_init();
