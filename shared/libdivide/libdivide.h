@@ -5,6 +5,6 @@
 
 #include <stdint.h>
 
-int32_t mod(int32_t val, int32_t div);
-int32_t divide(int32_t number, int32_t divisor);
+int32_t mod(int32_t val, uint32_t div);
 uint32_t divide_u(uint32_t number, uint32_t divisor);
+int32_t divide_s(int32_t number, uint32_t divisor);

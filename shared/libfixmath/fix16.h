@@ -22,6 +22,7 @@ extern "C"
 #endif
 
 #include <stdint.h>
+#include "../libdivide/libdivide.h"
 
 typedef int32_t fix16_t;
 
@@ -52,8 +53,10 @@ static inline int fix16_to_int(fix16_t a)
     return (a >> 16);
 #else
 	if (a >= 0)
-		return (a + (fix16_one >> 1)) / fix16_one;
-	return (a - (fix16_one >> 1)) / fix16_one;
+        return divide_s(a + (fix16_one >> 1), fix16_one);
+//		return (a + (fix16_one >> 1)) / fix16_one;
+    return divide_s(a - (fix16_one >> 1), fix16_one);
+//	return (a - (fix16_one >> 1)) / fix16_one;
 #endif
 }
 

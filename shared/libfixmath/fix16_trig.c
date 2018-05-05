@@ -1,5 +1,6 @@
 #include <limits.h>
 #include "fix16.h"
+#include "../libdivide/libdivide.h"
 
 #if defined(FIXMATH_SIN_LUT)
 #include "fix16_trig_sin_lut.h"
@@ -47,9 +48,7 @@ fix16_t fix16_sin_parabola(fix16_t inAngle)
 fix16_t fix16_sin(fix16_t inAngle)
 {
 //	fix16_t tempAngle = inAngle % (fix16_pi << 1);
-	fix16_t tempAngle = inAngle;
-	int mod = (fix16_pi << 1);
-	while(tempAngle > mod) tempAngle -= mod;
+	fix16_t tempAngle = mod(inAngle, fix16_pi << 1);
 
 	#ifdef FIXMATH_SIN_LUT
 	if(tempAngle < 0)

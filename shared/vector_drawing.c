@@ -4,19 +4,33 @@
 
 int point_dist(Point p0, Point p1) {
     int dx = p0.x - p0.y;
-    int dy = p1.x - p1.y;
-    return dx*dx+dy*dy;
+    int dy = p0.y - p1.y;
+    int dz = p0.z - p1.z;
+    return dx*dx+dy*dy+dz*dz;
+}
+
+Point point_new(int x, int y, int z) {
+    return (Point) {.x=x, .y=y, .z=z};
 }
 
 Point point_add(Point p0, Point p1){
-    return (Point) {.x=p0.x + p1.x, .y=p0.y+p1.y};
+    return (Point) {.x=p0.x + p1.x, .y=p0.y+p1.y, .z=p0.z+p1.z};
 }
-Point point_offset(Point p, int x, int y) {
-    return (Point) {.x=p.x+x, .y=p.y+y};
+Point point_offset(Point p, int x, int y, int z) {
+    return (Point) {.x=p.x+x, .y=p.y+y, .z=p.z+z};
 }
 
 Point point_from_v4d(v4d* vec) {
-    return (Point) {.x=vec->x, .y=vec->y};
+    return (Point) {.x=fix16_to_int(vec->x), .y=fix16_to_int(vec->y), .z=fix16_to_int(vec->z)};
+}
+
+v4d point_to_v4d(Point* point) {
+    return (v4d) {
+            .x=fix16_from_int(point->x),
+            .y=fix16_from_int(point->y),
+            .z=fix16_from_int(point->z),
+            .w=fix16_from_int(1),
+    };
 }
 
 // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm

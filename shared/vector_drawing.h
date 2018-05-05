@@ -6,12 +6,17 @@
 typedef struct Point {
     int x;
     int y;
+    int z;
 } Point;
+
+Point point_new(int x, int y, int z);
 
 int point_dist(Point p0, Point p1);
 Point point_add(Point p0, Point p1);
-Point point_offset(Point p0, int x, int y);
+Point point_offset(Point p0, int x, int y, int z);
+
 Point point_from_v4d(v4d* vec);
+v4d point_to_v4d(Point* point);
 
 #endif //ARM_DISPLAY_EMULATOR_VECTOR_DRAWING_H
 
