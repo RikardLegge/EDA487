@@ -73,36 +73,13 @@ void set_perspective_projection(int fovx, int fovy, int near, int far) {
     projection.data[3][3] = 0;
 };
 
-void set_orthographic_projection(int right, int left, int bottom, int top, int near, int far) {
-    projection.data[0][0] = fix16_div(F16C(-2, 0), fix16_from_int(left-right));
-    projection.data[0][1] = 0;
-    projection.data[0][2] = 0;
-    projection.data[0][3] = 0;
-
-    projection.data[1][0] = 0;
-    projection.data[1][1] = fix16_div(F16C(-2, 0), fix16_from_int(bottom-top));
-    projection.data[1][2] = 0;
-    projection.data[1][3] = 0;
-
-    projection.data[2][0] = 0;
-    projection.data[2][1] = 0;
-    projection.data[2][2] = fix16_div(F16C(2, 0), F16C(near - far, 0));
-    projection.data[2][3] = 0;
-
-    projection.data[3][0] = fix16_div(fix16_from_int(left + right), fix16_from_int(left-right));
-    projection.data[3][1] = fix16_div(fix16_from_int(top + bottom), fix16_from_int(bottom-top));
-    projection.data[3][2] = fix16_div(fix16_from_int(far + near), fix16_from_int(near-far));
-    projection.data[3][3] = fix16_one;
-}
-
 int always_false = 0;
 void game_init() {
     if(always_false)
         debug_methods_exist();
 
     canvas_clear();
-    set_perspective_projection(1, 1, 1, 100);
-//    set_orthographic_projection(32, -32, 64, -64, 1, 100);
+    set_perspective_projection(2, 2, 1, 100);
 }
 
 int camera_x = 0;
@@ -123,6 +100,13 @@ void handle_input() {
     }
     if (key_is_active(0x9)) {
         camera_x += 1;
+    }
+
+    if (key_is_active(0x2)) {
+        camera_y -= 1;
+    }
+    if (key_is_active(0x0)) {
+        camera_y += 1;
     }
 
     if (key_is_active(0x5)) {
@@ -192,7 +176,11 @@ void draw_scene() {
     fix16_t angle = fix16_div(fix16_from_int(camera_rot), F16C(10,0));
 
     {
-        create_translation(&wm_trans, fix16_one, fix16_one, fix16_one);
+        create_translation(&wm_trans,
+//                fix16_one, fix16_one, fix16_one);
+                fix16_div(fix16_from_int(camera_x), F16C(10,0)),
+                fix16_div(fix16_from_int(camera_y), F16C(10,0)),
+                fix16_div(fix16_from_int(camera_z), F16C(10,0)));
         create_rotation_y(&wm_rot, angle);
         create_scale(&wm_scale, fix16_one, fix16_one, fix16_one);
 
@@ -201,51 +189,41 @@ void draw_scene() {
     }
 
     {
+//        fix16_t x = fix16_mul(fix16_cos(angle), F16C(10,0));
+//        fix16_t z = fix16_mul(fix16_sin(angle), F16C(10,0));
         create_translation(&cam_trans,
-                fix16_from_int(camera_x),
-                fix16_from_int(camera_y),
-                fix16_from_int(camera_z));
+                0, 0, 0);
+//                fix16_one, fix16_one, fix16_one);
+//                fix16_from_int(camera_x),
+//                fix16_from_int(camera_y),
+//                fix16_from_int(camera_z));
         create_rotation_y(&cam_rot,
+//                angle);
+//                0);
                 fix16_div(fix16_from_int(camera_rot), F16C(40,0)));
 
         mf16_mul(&cam_projection, &cam_trans, &cam_rot);
     }
 
     mf16_mul(&cam_matrix, &cam_projection, &world_matrix);
-    mf16_mul(&transform_matrix, &projection, &cam_matrix);
+//    mf16_mul(&transform_matrix, &projection, &cam_matrix);
+    mf16_mul(&transform_matrix, &cam_matrix, &projection);
 
     draw_plane(
-            point_new(0, 0, 10),
-            point_new(10,0, 10),
-            point_new(10,10,10),
-            point_new(0, 10,10),
+            point_new(20, 20, 10),
+            point_new(10, 20, 10),
+            point_new(10, 10,10),
+            point_new(20, 10,10),
             &transform_matrix
     );
 
     draw_plane(
-            point_new(0,0, 0),
-            point_new(0,0, 10),
-            point_new(0,10,10),
-            point_new(0,10,0),
+            point_new(20, 20, 0),
+            point_new(20,20, 10),
+            point_new(20,10,10),
+            point_new(20,10,0),
             &transform_matrix
     );
-
-//    v4d vectors[] = {
-//        (v4d) {F16C(0,0),    F16C(0,0),  F16C(10,0),fix16_one},
-//        (v4d) {F16C(10,0),   F16C(0,0),  F16C(10,0),fix16_one},
-//        (v4d) {F16C(10,0),   F16C(20,0),  F16C(10,0),fix16_one},
-//        (v4d) {F16C(0,0),    F16C(20,0),  F16C(10,0),fix16_one}
-//    };
-//
-//    Point points[4];
-//    for (int i = 0; i < 4; i++) {
-//        v4d vector_transformed;
-//        v4d_mf16_mult(&vectors[i], &transform_matrix, &vector_transformed);
-//        points[i] = point_from_v4d(&vector_transformed);
-//    }
-//    vector_plane(points[0], points[1], points[2], points[3]);
-
-
 }
 
 void game_loop() {
