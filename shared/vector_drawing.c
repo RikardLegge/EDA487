@@ -21,15 +21,15 @@ Point point_offset(Point p, int x, int y, int z) {
 }
 
 Point point_from_v4d(v4d* vec) {
-    return (Point) {.x=fix16_to_int(vec->x), .y=fix16_to_int(vec->y), .z=fix16_to_int(vec->z)};
+    return (Point) {.x=fix16_to_int(vec->x), .y=fix16_to_int(vec->y), .z=-fix16_to_int(vec->z)};
 }
 
 v4d point_to_v4d(Point* point) {
     return (v4d) {
             .x=fix16_from_int(point->x),
             .y=fix16_from_int(point->y),
-            .z=fix16_from_int(point->z),
-            .w=fix16_from_int(1),
+            .z=fix16_from_int(-point->z),
+            .w=fix16_one,
     };
 }
 
@@ -97,10 +97,86 @@ void vector_line(Point p0, Point p1) {
 }
 
 void vector_plane(Point p0, Point p1, Point p2, Point p3) {
+    int near = 5;
+    if(p0.z > near || p1.z > near || p2.z > near || p3.z > near )
+        return;
+
     vector_line(p0, p1);
     vector_line(p1, p2);
     vector_line(p2, p3);
     vector_line(p3, p0);
 
-    vector_line(p0, p2);
+//    vector_line(p0, p2);
+}
+
+
+void to_cartesian(v4d* vec) {
+    vec->x = fix16_div(vec->x, vec->w);
+    vec->y = fix16_div(vec->y, vec->w);
+    vec->z = fix16_div(vec->z, vec->w);
+}
+
+void to_homogeneous(v4d* vec) {
+    fix16_t w = vec->w;
+
+    vec->x = fix16_mul(vec->x, w);
+    vec->y = fix16_mul(vec->y, w);
+    vec->z = fix16_mul(vec->z, w);
+}
+
+void vector_draw_plane(Point p0, Point p1, Point p2, Point p3, mf16 *transform_matrix) {
+    v4d vectors[] = {
+            point_to_v4d(&p0),
+            point_to_v4d(&p1),
+            point_to_v4d(&p2),
+            point_to_v4d(&p3),
+    };
+
+    Point points[4];
+    for (int i = 0; i < 4; i++) {
+//        to_cartesian(&vectors[i]);
+        v4d vector_transformed;
+        v4d_mf16_mult(&vectors[i], transform_matrix, &vector_transformed);
+        to_cartesian(&vector_transformed);
+        points[i] = point_from_v4d(&vector_transformed);
+    }
+    vector_plane(points[0], points[1], points[2], points[3]);
+}
+
+void vector_draw_box(Point tl, int w, int h, int d, mf16 *transform_matrix) {
+    int x = tl.x;
+    int y = tl.y;
+    int z = tl.z;
+
+    vector_draw_plane(
+            point_new(x - w, y - h, z - d),
+            point_new(x + w, y - h, z - d),
+            point_new(x + w, y + h, z - d),
+            point_new(x - w, y + h, z - d),
+            transform_matrix
+    );
+
+    vector_draw_plane(
+            point_new(x - w, y - h, z + d),
+            point_new(x + w, y - h, z + d),
+            point_new(x + w, y + h, z + d),
+            point_new(x - w, y + h, z + d),
+            transform_matrix
+    );
+
+    vector_draw_plane(
+            point_new(x - w, y - h, z + d),
+            point_new(x - w, y + h, z + d),
+            point_new(x - w, y + h, z - d),
+            point_new(x - w, y - h, z - d),
+            transform_matrix
+    );
+
+    vector_draw_plane(
+            point_new(x + w, y - h, z + d),
+            point_new(x + w, y + h, z + d),
+            point_new(x + w, y + h, z - d),
+            point_new(x + w, y - h, z - d),
+            transform_matrix
+    );
 }

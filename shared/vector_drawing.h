@@ -22,3 +22,6 @@ v4d point_to_v4d(Point* point);
 
 void vector_line(Point p0, Point p1);
 void vector_plane(Point p0, Point p1, Point p2, Point p3);
+
+void vector_draw_plane(Point p0, Point p1, Point p2, Point p3, mf16 *transform_matrix);
+void vector_draw_box(Point tl, int w, int h, int d, mf16 *transform_matrix);

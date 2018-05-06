@@ -82,10 +82,10 @@ fix16_t fa16_dot(const fix16_t *a, uint_fast8_t a_stride,
 }
 #endif
 
-#ifdef __GNUC__
+//#ifdef __GNUC__
 // Count leading zeros, using processor-specific instruction if available.
-#define clz(x) (__builtin_clzl(x) - (8 * sizeof(long) - 32))
-#else
+//#define clz(x) (__builtin_clzl(x) - (8 * sizeof(long) - 32))
+//#else
 static uint8_t clz(uint32_t x)
 {
   uint8_t result = 0;
@@ -94,7 +94,7 @@ static uint8_t clz(uint32_t x)
   while (!(x & 0x80000000)) { result += 1; x <<= 1; }
   return result;
 }
-#endif
+//#endif
 
 static fix16_t scale_value(fix16_t value, int_fast8_t scale)
 {

@@ -26,5 +26,6 @@ void v4d_normalize(v4d *dest, const v4d *a);
 
 // Dot product
 fix16_t v4d_dot(const v4d *a, const v4d *b);
+void v4d_cross(v4d *dest, const v4d *a, const v4d *b);
 
 #endif

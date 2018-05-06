@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=Rikard Legge
-Date                   :=05/05/2018
+Date                   :=06/05/2018
 CodeLitePath           :="/Users/legge/Library/Application Support/CodeLite"
 LinkerName             :=$(CodeLiteDir)/tools/gcc-arm-custom/bin/arm-none-eabi-g++
 SharedObjectLinkerName :=$(CodeLiteDir)/tools/gcc-arm-custom/bin/arm-none-eabi-g++ -shared -fPIC
@@ -28,7 +28,7 @@ LibraryPathSwitch      :=-L
 PreprocessorSwitch     :=-D
 SourceSwitch           :=-c 
 OutputFile             :=$(IntermediateDirectory)/$(ProjectName).elf
-Preprocessors          :=$(PreprocessorSwitch)FIXMATH_NO_CACHE=1 $(PreprocessorSwitch)FIXMATH_NO_64BIT=1 $(PreprocessorSwitch)FIXMATH_FAST_SIN=1 
+Preprocessors          :=$(PreprocessorSwitch)FIXMATH_NO_CACHE=1 $(PreprocessorSwitch)FIXMATH_NO_64BIT=1 $(PreprocessorSwitch)FIXMATH_FAST_SIN=1 $(PreprocessorSwitch)FIXMATH_OPTIMIZE_8BIT=1 
 ObjectSwitch           :=-o 
 ArchiveOutputSwitch    := 
 PreprocessOnlySwitch   :=-E

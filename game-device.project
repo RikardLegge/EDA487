@@ -93,6 +93,7 @@
         <Preprocessor Value="FIXMATH_NO_CACHE=1"/>
         <Preprocessor Value="FIXMATH_NO_64BIT=1"/>
         <Preprocessor Value="FIXMATH_FAST_SIN=1"/>
+        <Preprocessor Value="FIXMATH_OPTIMIZE_8BIT=1"/>
       </Compiler>
       <Linker Options="-T$(ProjectPath)/md407-ram.x;-L$(ARM_V6LIB) -L$(ARM_GCC_V6LIB);-nostdlib" Required="yes">
         <Library Value="gcc"/>

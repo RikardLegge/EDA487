@@ -67,7 +67,7 @@ void v4d_div_s(v4d *dest, const v4d *a, fix16_t b)
 // Norm
 fix16_t v4d_norm(const v4d *a)
 {
-    return fa16_norm(&a->x, &a->y - &a->x, 4);
+    return fa16_norm(&a->x, &a->y - &a->x, 3);
 }
 
 void v4d_normalize(v4d *dest, const v4d *a)
@@ -79,4 +79,16 @@ void v4d_normalize(v4d *dest, const v4d *a)
 fix16_t v4d_dot(const v4d *a, const v4d *b)
 {
     return fa16_dot(&a->x, &a->y - &a->x, &b->x, &b->y - &b->x, 4);
+}
+
+// Cross product
+void v4d_cross(v4d *dest, const v4d *a, const v4d *b)
+{
+    v4d tmp;
+    fa16_unalias(dest, (void**)&a, (void**)&b, &tmp, sizeof(tmp));
+
+    dest->x = fix16_sub(fix16_mul(a->y, b->z), fix16_mul(a->z, b->y));
+    dest->y = fix16_sub(fix16_mul(a->z, b->x), fix16_mul(a->x, b->z));
+    dest->z = fix16_sub(fix16_mul(a->x, b->y), fix16_mul(a->y, b->x));
+    dest->w = 0;
 }
