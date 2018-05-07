@@ -78,7 +78,7 @@ void v4d_normalize(v4d *dest, const v4d *a)
 // Dot product
 fix16_t v4d_dot(const v4d *a, const v4d *b)
 {
-    return fa16_dot(&a->x, &a->y - &a->x, &b->x, &b->y - &b->x, 4);
+    return fa16_dot(&a->x, &a->y - &a->x, &b->x, &b->y - &b->x, 3);
 }
 
 // Cross product
