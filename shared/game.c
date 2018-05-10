@@ -7,6 +7,7 @@
 #include "vector_drawing.h"
 #include "level.h"
 #include "images/won.xbm"
+#include "images/alien.xbm"
 
 typedef struct Player {
     float x;
@@ -19,7 +20,7 @@ typedef struct Player {
 Player player;
 
 void reset_player() {
-    player.x = 0;
+    player.x = 1;
     player.y = 50;
     player.level = 0;
 }
@@ -77,6 +78,7 @@ void handle_input() {
 }
 
 Sprite won_sprite;
+Sprite player_sprite;
 
 void game_init() {
     canvas_clear();
@@ -84,12 +86,16 @@ void game_init() {
     reset_player();
 
     won_sprite = sprite_load(won_bits, won_width, won_height);
+    player_sprite = sprite_load(alien_bits, alien_width, alien_height);
 }
 
 void move_player(){
     handle_input();
     player_step();
-    canvas_pixel(player.x,player.y,0);
+    
+    int x = (int)player.x-player_sprite.width/2+1;
+    int y = (int)player.y-player_sprite.height+1;
+    sprite_draw_scaled(&player_sprite, x, y, 1, 0, 0);
 }
 
 void you_lost(){

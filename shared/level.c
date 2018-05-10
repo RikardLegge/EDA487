@@ -34,6 +34,6 @@ int level_sample_at(int x, int y, uint8_t  level_id) {
 
 void draw_level(uint8_t level_id) {
     if(level_id >= level_count) return;
-    sprite_draw_scaled(&levels[level_id], 0, 0, 4, 1);
+    sprite_draw_scaled(&levels[level_id], 0, 0, 4, 1, 1);
 }
 

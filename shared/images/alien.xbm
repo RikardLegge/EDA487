@@ -1,0 +1,4 @@
+#define alien_width 5
+#define alien_height 7
+static unsigned char alien_bits[] = {
+   0x0a, 0x00, 0x11, 0x0e, 0x04, 0x0a, 0x1b };

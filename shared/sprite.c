@@ -25,7 +25,7 @@ void sprite_draw(Sprite *sprite, uint8_t x, uint8_t y) {
     }
 }
 
-void sprite_draw_scaled(Sprite *sprite, uint8_t x, uint8_t y, uint8_t scale, uint8_t invert) {
+void sprite_draw_scaled(Sprite *sprite, uint8_t x, uint8_t y, uint8_t scale, uint8_t invert, uint8_t set_value) {
     int height = sprite->height;
     int width = sprite->width;
 
@@ -41,9 +41,9 @@ void sprite_draw_scaled(Sprite *sprite, uint8_t x, uint8_t y, uint8_t scale, uin
                     for (int sy = 0; sy < scale; sy++) {
                         int set = byte & (0x1 << index);
                         if (set && !invert) {
-                            canvas_pixel((8 * col + index) * scale + sx + x, row * scale + sy + y, 1);
+                            canvas_pixel((8 * col + index) * scale + sx + x, row * scale + sy + y, set_value);
                         } else if(!set && invert) {
-                            canvas_pixel((8 * col + index) * scale + sx + x, row * scale + sy + y, 1);
+                            canvas_pixel((8 * col + index) * scale + sx + x, row * scale + sy + y, set_value);
                         }
                     }
                 }

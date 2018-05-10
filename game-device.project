@@ -59,7 +59,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="Cross GCC ( arm-none-eabi )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O1;-mthumb;-Wall;-march=armv6-m;-Wa,-adhln=test.s;-msoft-float;" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-mthumb;-Wall;-march=armv6-m;-Wa,-adhln=test.s;-msoft-float;" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <Preprocessor Value="FIXMATH_NO_CACHE=1"/>
         <Preprocessor Value="FIXMATH_NO_64BIT=1"/>
@@ -74,10 +74,10 @@
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName).elf" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(IntermediateDirectory)/$(ProjectName).elf" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <BuildSystem Name="Default"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
-        <![CDATA[ARM_V6LIB=$(GccArmDir)/arm-none-eabi/lib/thumb/v6-m
-ARM_GCC_V6LIB=$(GccArmDir)/lib/gcc/arm-none-eabi/7.2.1/thumb/v6-m
-ARM_M4FPLIB=$(GccArmDir)/arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard
-ARM_GCC_M4FPLIB=$(GccArmDir)/lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m]]>
+        <![CDATA[ARM_V6LIB=$(CustomGccArmDir)/arm-none-eabi/lib/thumb/v6-m
+ARM_GCC_V6LIB=$(CustomGccArmDir)/lib/gcc/arm-none-eabi/7.2.1/thumb/v6-m
+ARM_M4FPLIB=$(CustomGccArmDir)/arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard
+ARM_GCC_M4FPLIB=$(CustomGccArmDir)/lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m]]>
       </Environment>
       <Debugger IsRemote="yes" RemoteHostName="localhost" RemoteHostPort="1234" DebuggerPath="" IsExtended="no">
         <DebuggerSearchPaths/>

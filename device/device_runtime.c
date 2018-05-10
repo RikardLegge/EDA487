@@ -142,7 +142,7 @@ void lcd_select_controller(uint8_t controller) {
         lcd_ctrl_bit_clear(LCD_CS1);
         lcd_ctrl_bit_set(LCD_CS2);
     }
-    if(controller == (LCD_CS1 & LCD_CS2)) {
+    if(controller == (LCD_CS1 | LCD_CS2)) {
         lcd_ctrl_bit_set(LCD_CS1 | LCD_CS2);
     }
 }

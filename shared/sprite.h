@@ -13,4 +13,4 @@ typedef struct Sprite {
 
 Sprite sprite_load(unsigned char* data, uint8_t width, uint8_t height);
 void sprite_draw(Sprite* sprite, uint8_t x, uint8_t y);
-void sprite_draw_scaled(Sprite *sprite, uint8_t x, uint8_t y, uint8_t scale, uint8_t invert);
+void sprite_draw_scaled(Sprite *sprite, uint8_t x, uint8_t y, uint8_t scale, uint8_t invert, uint8_t set_value);
