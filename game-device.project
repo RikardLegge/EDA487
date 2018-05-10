@@ -23,38 +23,45 @@
     <File Name="device/device_runtime.h"/>
     <File Name="device/device_runtime.c"/>
     <VirtualDirectory Name="shared">
-      <VirtualDirectory Name="libdivide">
-        <File Name="shared/libdivide/libdivide.h"/>
-        <File Name="shared/libdivide/libdivide.c"/>
+      <VirtualDirectory Name="math">
+        <File Name="shared/math/s_sqrt.c"/>
+        <File Name="shared/math/export.c"/>
+        <File Name="shared/math/arm_math.h"/>
+        <VirtualDirectory Name="single">
+          <File Name="shared/math/single/e_powf.c" ExcludeProjConfig="Debug;"/>
+          <File Name="shared/math/single/e_logf.c" ExcludeProjConfig="Debug;"/>
+          <File Name="shared/math/single/e_expf.c" ExcludeProjConfig="Debug;"/>
+        </VirtualDirectory>
+        <File Name="shared/math/s_tanf.c"/>
+        <File Name="shared/math/s_sinf.c"/>
+        <File Name="shared/math/s_sincosf.c" ExcludeProjConfig="Debug;"/>
+        <File Name="shared/math/s_cosf.c"/>
+        <File Name="shared/math/rredf.h"/>
+        <File Name="shared/math/rredf.c"/>
+        <File Name="shared/math/poly.c"/>
+        <File Name="shared/math/math_private.h"/>
+        <File Name="shared/math/math_errf.c"/>
+        <File Name="shared/math/math_config.h"/>
+        <File Name="shared/math/ieee_status.c"/>
+        <File Name="shared/math/funder.c"/>
+        <File Name="shared/math/e_rem_pio2.c"/>
+        <File Name="shared/math/e_powf.c"/>
+        <File Name="shared/math/e_powf_log2_data.c"/>
+        <File Name="shared/math/e_logf.c"/>
+        <File Name="shared/math/e_logf_data.c"/>
+        <File Name="shared/math/e_log2f.c"/>
+        <File Name="shared/math/e_log2f_data.c"/>
+        <File Name="shared/math/e_expf.c"/>
+        <File Name="shared/math/e_exp2f.c"/>
+        <File Name="shared/math/e_exp2f_data.c"/>
+        <File Name="shared/math/dunder.c"/>
       </VirtualDirectory>
-      <VirtualDirectory Name="libfixmatrix">
-        <File Name="shared/libfixmatrix/fixvector4d.h"/>
-        <File Name="shared/libfixmatrix/fixvector4d.c"/>
-        <File Name="shared/libfixmatrix/fixvector3d.h"/>
-        <File Name="shared/libfixmatrix/fixvector3d.c"/>
-        <File Name="shared/libfixmatrix/fixvector2d.h"/>
-        <File Name="shared/libfixmatrix/fixvector2d.c"/>
-        <File Name="shared/libfixmatrix/fixquat.h"/>
-        <File Name="shared/libfixmatrix/fixquat.c"/>
-        <File Name="shared/libfixmatrix/fixmatrix.h"/>
-        <File Name="shared/libfixmatrix/fixmatrix.c"/>
-        <File Name="shared/libfixmatrix/fixarray.h"/>
-        <File Name="shared/libfixmatrix/fixarray.c"/>
-      </VirtualDirectory>
-      <VirtualDirectory Name="libfixmath">
-        <File Name="shared/libfixmath/uint32.h"/>
-        <File Name="shared/libfixmath/uint32.c"/>
-        <File Name="shared/libfixmath/int64.h"/>
-        <File Name="shared/libfixmath/fract32.h"/>
-        <File Name="shared/libfixmath/fract32.c"/>
-        <File Name="shared/libfixmath/fixmath.h"/>
-        <File Name="shared/libfixmath/fix16.hpp"/>
-        <File Name="shared/libfixmath/fix16.h"/>
-        <File Name="shared/libfixmath/fix16.c"/>
-        <File Name="shared/libfixmath/fix16_trig.c"/>
-        <File Name="shared/libfixmath/fix16_trig_sin_lut.h"/>
-        <File Name="shared/libfixmath/fix16_sqrt.c"/>
-        <File Name="shared/libfixmath/fix16_exp.c"/>
+      <VirtualDirectory Name="matrix-lib">
+        <File Name="shared/matrix-lib/vec3.c" ExcludeProjConfig=""/>
+        <File Name="shared/matrix-lib/quat.c" ExcludeProjConfig=""/>
+        <File Name="shared/matrix-lib/mat4.c" ExcludeProjConfig=""/>
+        <File Name="shared/matrix-lib/mat3.c" ExcludeProjConfig=""/>
+        <File Name="shared/matrix-lib/gl-matrix.h"/>
       </VirtualDirectory>
       <File Name="shared/vector_drawing.h"/>
       <File Name="shared/vector_drawing.c"/>
@@ -88,14 +95,14 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="Cross GCC ( arm-none-eabi )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O0;-mthumb;-Wall;-march=armv6-m;-Wa,-adhln=test.s;-msoft-float;" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-g;-O0;-Wall" C_Options="-g;-O1;-mthumb;-Wall;-march=armv6-m;-Wa,-adhln=test.s;-msoft-float;" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <Preprocessor Value="FIXMATH_NO_CACHE=1"/>
         <Preprocessor Value="FIXMATH_NO_64BIT=1"/>
         <Preprocessor Value="FIXMATH_FAST_SIN=1"/>
         <Preprocessor Value="FIXMATH_OPTIMIZE_8BIT=1"/>
       </Compiler>
-      <Linker Options="-T$(ProjectPath)/md407-ram.x;-L$(ARM_V6LIB) -L$(ARM_GCC_V6LIB);-nostdlib" Required="yes">
+      <Linker Options="-T$(ProjectPath)/md407-ram.x;-L$(ARM_V6LIB) -L$(ARM_GCC_V6LIB);-nostdlib;" Required="yes">
         <Library Value="gcc"/>
         <Library Value="c_nano"/>
       </Linker>
