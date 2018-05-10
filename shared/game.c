@@ -5,6 +5,7 @@
 #include "canvas.h"
 #include "sprite.h"
 #include "vector_drawing.h"
+#include "level.h"
 
 int camera_x = 0;
 int camera_y = 0;
@@ -59,13 +60,15 @@ void handle_input() {
 
 void game_init() {
     canvas_clear();
+    load_levels();
 }
 
 void game_loop() {
     handle_input();
 
     canvas_clear();
-    
+
+    draw_level();
     canvas_pixel(10,10,1);
     
     canvas_flush();

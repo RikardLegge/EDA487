@@ -23,9 +23,12 @@
     <File Name="device/device_runtime.h"/>
     <File Name="device/device_runtime.c"/>
     <VirtualDirectory Name="shared">
+      <File Name="shared/level.h"/>
+      <File Name="shared/level.c"/>
       <File Name="shared/vector_drawing.h"/>
       <File Name="shared/vector_drawing.c"/>
       <VirtualDirectory Name="images">
+        <File Name="shared/images/level_1.xbm"/>
         <File Name="shared/images/smily.xbm"/>
         <File Name="shared/images/ball.xbm"/>
       </VirtualDirectory>
