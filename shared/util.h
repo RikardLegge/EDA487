@@ -8,3 +8,4 @@ typedef unsigned char uint8_t;
 #endif
 
 int abs(int number);
+int sign(int num);

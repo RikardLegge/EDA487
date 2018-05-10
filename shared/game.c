@@ -9,10 +9,10 @@
 #include "images/won.xbm"
 
 typedef struct Player {
-    int x;
-    int y;
-    int dx;
-    int dy;
+    float x;
+    float y;
+    float dx;
+    float dy;
 } Player;
 
 Player player;
@@ -23,7 +23,22 @@ void reset_player() {
 }
 
 void player_handle_collission() {
+    int is_floor = level_sample_at(player.x, player.y);
+    int sign_y = sign(player.dy);
+    while(is_floor) {
+        player.y -= player.dy;
+        is_floor = level_sample_at(player.x, player.y);
 
+        if(!is_floor) {
+            while(!level_sample_at(player.x, player.y+sign_y)) {
+                player.y += sign_y;
+            }
+            return;
+        }
+
+        player.x -= player.dx;
+        is_floor = level_sample_at(player.x, player.y);
+    }
 }
 
 void player_step() {
@@ -32,7 +47,7 @@ void player_step() {
 
     player_handle_collission();
 
-    player.dy += 1;
+    player.dy += 0.5;
     if(player.dy > 3) {
         player.dy = 3;
     }
@@ -49,7 +64,9 @@ void handle_input() {
     }
 
     if (key_is_active(0x5)) {
-        player.dy = -4;
+        if(level_sample_at(player.x, player.y + 1)) {
+            player.dy = -4;
+        }
     }
 
     if (key_is_active(0x1)) {
