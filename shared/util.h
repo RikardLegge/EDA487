@@ -9,3 +9,5 @@ typedef unsigned char uint8_t;
 
 int abs(int number);
 int sign(int num);
+
+float absf(float num);

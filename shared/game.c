@@ -19,12 +19,12 @@ typedef struct Player {
 } Player;
 
 typedef struct Enemy {
-    int x0;
-    int y0;
-    int x;
-    int y;
-    int dx;
-    int dy;
+    float x0;
+    float y0;
+    float x;
+    float y;
+    float dx;
+    float dy;
 } Enemy;
 
 Player player;
@@ -42,7 +42,7 @@ void reset_enemy(int x, int y){
     enemy.y0 = y;
     enemy.x = 0;
     enemy.y = 0;
-    enemy.dx = 1;
+    enemy.dx = 0.5;
     enemy.dy = 0;
 }
 
@@ -122,6 +122,7 @@ void game_init() {
     canvas_clear();
     load_levels();
     reset_player();
+    reset_enemy(20,45);
 
     won_sprite = sprite_load(won_bits, won_width, won_height);
     player_sprite = sprite_load(alien_bits, alien_width, alien_height);
@@ -148,9 +149,12 @@ void check_won(){
 }
 
 void check_lost(){
-    if((player.y < 0) || (player.y > 64)){
+    int xdist = (int) absf(player.x - (enemy.x0+enemy.x));
+    int ydist = (int) absf(player.y - (enemy.y0+enemy.y));
+    if((player.y < 0) || (player.y > 64) || ((xdist < 4) && (ydist < 4)) ){
         is_end_of_game = 2;
     }
+
 }
 
 void draw_lost(){
@@ -171,15 +175,15 @@ void draw_won(){
 
 void enemy_path(){
     //reset_enemy(20, 20);
-    int pathway = 10;
-    int distance = abs(enemy.x0 - enemy.x);
+    int pathway = 5;
+    float distance = absf(enemy.x);
     
     if(distance > pathway) {
-        enemy.x = pathway * sign(enemy.dx);
+        enemy.x = pathway * sign(enemy.dx * 1000);
         enemy.dx = -enemy.dx;
     }
-    enemy.x += enemy.dx;
     
+    enemy.x += enemy.dx;
     canvas_pixel(enemy.x0+enemy.x,enemy.y0 + enemy.y,0);
 }
 
@@ -196,7 +200,6 @@ void game_loop() {
     } else {
         draw_level(player.level);
         move_player();
-        reset_enemy(20,20);
         enemy_path();
     }
     canvas_flush();

@@ -4,6 +4,10 @@ int abs(int num) {
     return num > 0 ? num : -num;
 }
 
+float absf(float num) {
+    return num > 0 ? num : -num;
+}
+
 int sign(int num) {
     if(num < 0) {
         return -1;
