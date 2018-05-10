@@ -9,6 +9,7 @@
 #include "images/won.xbm"
 #include "images/alien.xbm"
 #include "images/lost.xbm"
+#include "images/enemy.xbm"
 
 typedef struct Player {
     float x;
@@ -49,7 +50,27 @@ void reset_game(){
         canvas_clear();
         reset_player();
         is_end_of_game = 0;
-}      
+}
+
+void reset_level(uint8_t level) {
+    level %= LEVEL_COUNT;
+    player.level = level;
+
+    switch(level) {
+        case 0:
+            reset_enemy(20,45);
+            break;
+        case 1:
+            reset_enemy(80,45);
+            break;
+        case 2:
+            reset_enemy(80,45);
+            break;
+        case 3:
+            reset_enemy(10,50);
+            break;
+    }
+}
 
 void player_handle_collission() {
     int is_floor = level_sample_at(player.x, player.y, player.level);
@@ -103,6 +124,7 @@ void handle_input() {
 
     if (key_is_active(0x1)) {
         reset_game();
+        reset_level(player.level);
         player.level = 0;
     }
 }
@@ -110,12 +132,15 @@ void handle_input() {
 void handle_input_reset() {
     if (key_is_active(0x1)) {
         reset_game();
+        reset_level(0);
         player.level = 0;
     }
 
     if (key_is_active(0x2)) {
         if (is_end_of_game == 1) {
-            player.level = (player.level+1) % LEVEL_COUNT;
+            reset_level(player.level + 1);
+        } else {
+            reset_level(player.level);
         }
         reset_game();
     }
@@ -124,16 +149,19 @@ void handle_input_reset() {
 Sprite won_sprite;
 Sprite player_sprite;
 Sprite lost_sprite;
+Sprite enemy_sprite;
 
 void game_init() {
     canvas_clear();
     load_levels();
     reset_player();
     reset_enemy(20,45);
+    reset_level(2);
 
     won_sprite = sprite_load(won_bits, won_width, won_height);
     player_sprite = sprite_load(alien_bits, alien_width, alien_height);
     lost_sprite = sprite_load(lost_bits, lost_width, won_height);
+    enemy_sprite = sprite_load(enemy_bits, enemy_width, enemy_height);
 }
 
 void move_player(){
@@ -156,9 +184,10 @@ void check_won(){
 }
 
 void check_lost(){
-    int xdist = (int) absf(player.x - (enemy.x0+enemy.x));
-    int ydist = (int) absf(player.y - (enemy.y0+enemy.y));
-    if(player.y > 64 || ((xdist < 4) && (ydist < 4)) ){
+    float xdist = absf(player.x - (enemy.x0+enemy.x));
+    float ydist = absf(player.y - (enemy.y0+enemy.y));
+    float dist = (xdist*xdist) + (ydist*ydist);
+    if(player.y > 64 ||dist < 44) {
         is_end_of_game = 2;
     }
 
@@ -181,7 +210,6 @@ void draw_won(){
 }
 
 void enemy_path(){
-    //reset_enemy(20, 20);
     int pathway = 5;
     float distance = absf(enemy.x);
     
@@ -191,8 +219,8 @@ void enemy_path(){
     }
 
     enemy.x += enemy.dx;
-    
-    canvas_pixel(enemy.x0+enemy.x,enemy.y0 + enemy.y,0);
+
+    sprite_draw_scaled(&enemy_sprite,(enemy.x0+enemy.x),(enemy.y0 + enemy.y), 1, 0, 0);
 }
 
 void write_int_to_string(char* str, unsigned int number, int index) {
