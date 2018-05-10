@@ -158,7 +158,7 @@ void check_won(){
 void check_lost(){
     int xdist = (int) absf(player.x - (enemy.x0+enemy.x));
     int ydist = (int) absf(player.y - (enemy.y0+enemy.y));
-    if((player.y < 0) || (player.y > 64) || ((xdist < 4) && (ydist < 4)) ){
+    if(player.y > 64 || ((xdist < 4) && (ydist < 4)) ){
         is_end_of_game = 2;
     }
 
@@ -215,7 +215,7 @@ void game_loop() {
         move_player();
         enemy_path();
 
-        char text[] = "Player x:    , y:    ";
+        char text[] = "Player x: XXX, y: XXX";
         write_int_to_string(text, player.x, 10);
         write_int_to_string(text, player.y, 18);
 
