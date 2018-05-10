@@ -28,6 +28,7 @@
       <File Name="shared/vector_drawing.h"/>
       <File Name="shared/vector_drawing.c"/>
       <VirtualDirectory Name="images">
+        <File Name="shared/images/won.xbm"/>
         <File Name="shared/images/level_1.xbm"/>
         <File Name="shared/images/smily.xbm"/>
         <File Name="shared/images/ball.xbm"/>
