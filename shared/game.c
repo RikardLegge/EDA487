@@ -29,7 +29,7 @@ void player_handle_collission() {
         player.y -= player.dy;
         is_floor = level_sample_at(player.x, player.y);
 
-        if(!is_floor) {
+        if(!is_floor && sign_y) {
             while(!level_sample_at(player.x, player.y+sign_y)) {
                 player.y += sign_y;
             }

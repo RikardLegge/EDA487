@@ -9,6 +9,8 @@ void load_levels() {
 }
 
 int level_sample_at(int x, int y) {
+    if(x < 0 || x > 128 || y < 0 || y > 64) return 0;
+
     Sprite level = levels[0];
     int height = level.height;
     int width = level.width;
