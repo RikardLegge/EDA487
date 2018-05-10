@@ -1,5 +1,3 @@
-#include "matrix-lib/gl-matrix.h"
-
 #ifndef ARM_DISPLAY_EMULATOR_VECTOR_DRAWING_H
 #define ARM_DISPLAY_EMULATOR_VECTOR_DRAWING_H
 

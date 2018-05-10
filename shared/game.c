@@ -65,5 +65,8 @@ void game_loop() {
     handle_input();
 
     canvas_clear();
+    
+    canvas_pixel(10,10,1);
+    
     canvas_flush();
 }
