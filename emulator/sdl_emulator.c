@@ -153,3 +153,8 @@ int key_is_active(int hex) {
     short key = hex_to_sdl[hex];
     return keyboard_input_keys[key] != 0;
 }
+
+void ascii_write_text(char* string, int x, int y) {
+    printf("Printing at(%d, %d): %s", x, y, string);
+    printf("\n");
+}

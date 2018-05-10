@@ -34,7 +34,6 @@ int  is_end_of_game = 0;
 void reset_player() {
     player.x = 1;
     player.y = 50;
-    player.level = 0;
 }
 
 void reset_enemy(int x, int y){
@@ -48,7 +47,6 @@ void reset_enemy(int x, int y){
 
 void reset_game(){
         canvas_clear();
-        load_levels();
         reset_player();
         is_end_of_game = 0;
 }      
@@ -105,11 +103,20 @@ void handle_input() {
 
     if (key_is_active(0x1)) {
         reset_game();
+        player.level = 0;
     }
 }
 
 void handle_input_reset() {
     if (key_is_active(0x1)) {
+        reset_game();
+        player.level = 0;
+    }
+
+    if (key_is_active(0x2)) {
+        if (is_end_of_game == 1) {
+            player.level = (player.level+1) % LEVEL_COUNT;
+        }
         reset_game();
     }
 }
@@ -143,7 +150,7 @@ void stop_player(){
 }
 
 void check_won(){
-    if(player.x > 127){
+    if(player.x > 110 && player.y < 20){
         is_end_of_game = 1;
     }
 }
@@ -182,11 +189,17 @@ void enemy_path(){
         enemy.x = pathway * sign(enemy.dx * 1000);
         enemy.dx = -enemy.dx;
     }
-    
+
     enemy.x += enemy.dx;
+    
     canvas_pixel(enemy.x0+enemy.x,enemy.y0 + enemy.y,0);
 }
 
+void write_int_to_string(char* str, unsigned int number, int index) {
+    str[index+2] = 48+(number % 10);
+    str[index+1] = 48+(number/10 % 10);
+    str[index] = 48+(number/100 % 10);
+}
 
 void game_loop() {
     check_won();
@@ -201,6 +214,12 @@ void game_loop() {
         draw_level(player.level);
         move_player();
         enemy_path();
+
+        char text[] = "Player x:    , y:    ";
+        write_int_to_string(text, player.x, 10);
+        write_int_to_string(text, player.y, 18);
+
+        ascii_write_text(text,1,1);
     }
     canvas_flush();
 }
