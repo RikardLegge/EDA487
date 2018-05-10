@@ -1,17 +1,21 @@
 #include "images/level_1.xbm"
+#include "images/level_2.xbm"
 #include "sprite.h"
 #include "canvas.h"
 
-Sprite levels[1];
+const int level_count = 2;
+Sprite levels[2];
 
 void load_levels() {
     levels[0] = sprite_load(level_1_bits, level_1_width, level_1_height);
+    levels[1] = sprite_load(level_2_bits, level_2_width, level_2_height);
 }
 
-int level_sample_at(int x, int y) {
+int level_sample_at(int x, int y, uint8_t  level_id) {
     if(x < 0 || x > 128 || y < 0 || y > 64) return 0;
+    if(level_id >= level_count) return 0;
 
-    Sprite level = levels[0];
+    Sprite level = levels[level_id];
     int height = level.height;
     int width = level.width;
 
@@ -28,7 +32,8 @@ int level_sample_at(int x, int y) {
     return byte & (0x1 << index);
 }
 
-void draw_level() {
-    sprite_draw_scaled(&levels[0], 0, 0, 4, 1);
+void draw_level(uint8_t level_id) {
+    if(level_id >= level_count) return;
+    sprite_draw_scaled(&levels[level_id], 0, 0, 4, 1);
 }
 

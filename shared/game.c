@@ -13,6 +13,7 @@ typedef struct Player {
     float y;
     float dx;
     float dy;
+    uint8_t level;
 } Player;
 
 Player player;
@@ -20,24 +21,25 @@ Player player;
 void reset_player() {
     player.x = 0;
     player.y = 50;
+    player.level = 0;
 }
 
 void player_handle_collission() {
-    int is_floor = level_sample_at(player.x, player.y);
+    int is_floor = level_sample_at(player.x, player.y, player.level);
     int sign_y = sign(player.dy);
     while(is_floor) {
         player.y -= player.dy;
-        is_floor = level_sample_at(player.x, player.y);
+        is_floor = level_sample_at(player.x, player.y, player.level);
 
         if(!is_floor && sign_y) {
-            while(!level_sample_at(player.x, player.y+sign_y)) {
+            while(!level_sample_at(player.x, player.y+sign_y, player.level)) {
                 player.y += sign_y;
             }
             return;
         }
 
         player.x -= player.dx;
-        is_floor = level_sample_at(player.x, player.y);
+        is_floor = level_sample_at(player.x, player.y, player.level);
     }
 }
 
@@ -64,7 +66,7 @@ void handle_input() {
     }
 
     if (key_is_active(0x5)) {
-        if(level_sample_at(player.x, player.y + 1)) {
+        if(level_sample_at(player.x, player.y + 1, player.level)) {
             player.dy = -4;
         }
     }
@@ -100,7 +102,7 @@ void you_lost(){
 
 void game_loop() {
     canvas_clear();
-    draw_level();
+    draw_level(player.level);
 
     move_player();
 
